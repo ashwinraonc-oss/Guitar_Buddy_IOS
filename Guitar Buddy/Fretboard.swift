@@ -73,8 +73,8 @@ struct FretBoardDiagramView: View {
                     for (j, fret) in fretArray.enumerated() {
                         guard fret != -1 && fret > 0 else { continue }
                         let rowFraction = usesAbsolutePos
-                            ? CGFloat(fret) / 5
-                            : CGFloat(fret - minFret) / 5
+                        ? (CGFloat(fret) - 0.5) / 5
+                        : (CGFloat(fret - minFret) + 0.5) / 5
                         let x = (CGFloat(j) + 0.5) * colWidth
                         let y = topPad + rowFraction * availHeight
                         let r: CGFloat = 10 * scale
@@ -140,6 +140,7 @@ struct VoicingsView: View {
                     }
                     else{
                         ForEach(Array(sortedVoicings.enumerated()), id: \.offset) { _, voicing in
+                                let _ = print(voicing)
                                 FretBoardDiagramView(fretArray: voicing)
                                     .containerRelativeFrame(.vertical)
                                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)

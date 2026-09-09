@@ -13,6 +13,8 @@ struct RootView: View {
     @State var dimmed = false
     @StateObject private var recorder = AudioController()
     @StateObject private var tuner = TunerController()
+    @StateObject private var progression = ProgressionController()
+    
     var body: some View {
         ZStack {
             TabView(selection: $selectedTab){
@@ -20,13 +22,13 @@ struct RootView: View {
                     .tag(0)
                 VoicingsView(recorder: recorder)
                     .tag(1)
-                TunerView(tuner: tuner)
+                ProgressionView(Progression: progression)
                     .tag(2)
                 Text("Tab4")
                     .tag(3)
                 Text("Tab5")
                     .tag(4)
-                Text("Tab6")
+                TunerView(tuner: tuner)
                     .tag(5)
             } .tabViewStyle(.page(indexDisplayMode: .never)).ignoresSafeArea()
             VStack{
@@ -50,7 +52,7 @@ struct RootView: View {
                         Button{
                             selectedTab = 2
                         }label:{
-                            Circle().fill(Color.purple).frame(width: 35, height: 35)/*.offset(x:  -5, y: 60)*/
+                            Circle().fill(Color.white).frame(width: 35, height: 35)/*.offset(x:  -5, y: 60)*/
                         }.opacity(selectedTab == 2 ? 0.3 : 1.0)
                         Button{
                             selectedTab = 3
@@ -65,7 +67,7 @@ struct RootView: View {
                         Button{
                             selectedTab = 5
                         }label:{
-                            Circle().fill(Color.white).frame(width: 35, height: 35)/*.offset(x:  25, y: 60)*/
+                            Circle().fill(Color.purple).frame(width: 35, height: 35)/*.offset(x:  25, y: 60)*/
                         }.opacity(selectedTab == 5 ? 0.3 : 1.0)
                     }
                 } .padding(.bottom, 0)

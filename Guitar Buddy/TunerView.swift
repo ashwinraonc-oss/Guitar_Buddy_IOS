@@ -28,7 +28,7 @@ struct TunerView: View {
         let arcDiameter = 300.0 * scale
         let labelRadius = 120.0 * scale
         let tickRadius = 95.0 * scale
-        let needleLength = 130.0 * scale
+        let needleLength = 90.0 * scale
         let centerOffset = 75.0 * scale
 
         let guitarNotes = ["E", "A", "D", "G", "B", "E"]
@@ -44,7 +44,7 @@ struct TunerView: View {
                         let angle = noteAngles[i] * .pi / 180
                         Text(guitarNotes[i])
                             .font(.system(size: 16 * scale, weight: .bold))
-                            .foregroundColor(.white)
+                            .foregroundColor(Color(red: 212/255, green: 230/255, blue: 135/255))
                             .offset(x: labelRadius * sin(angle), y: -labelRadius * cos(angle) + centerOffset)
                     }
                     let allTickAngles = stride(from: -85.0, through: 85.0, by: 5.0).map { $0 }
@@ -61,15 +61,15 @@ struct TunerView: View {
                     }
                     Circle()
                         .trim(from: 0.5, to: 1.0)
-                        .stroke(Color.white, lineWidth: 4)
+                        .stroke(Color.yellow, lineWidth: 2)
                         .frame(width: arcDiameter, height: arcDiameter)
                         .offset(y: centerOffset)
 
                     Capsule()
-                        .fill(Color.white)
+                        .fill(Color.yellow)
                         .frame(width: 4, height: needleLength)
                         .rotationEffect(.degrees(needleAngle), anchor: .bottom)
-                        .offset(y: 10)
+                        .offset(y: centerOffset - needleLength / 2)
                         .animation(.spring(response: 0.3, dampingFraction: 0.7), value: needleAngle)
                 }
                 .frame(width: arcDiameter, height: arcDiameter / 2 + 5)
@@ -78,6 +78,7 @@ struct TunerView: View {
                     Text("\(tuner.detectedNote)")
                 }
                 .font(.system(size: 60, weight: .bold))
+                .offset(y:-20)
                 .onAppear{tuner.startTuning()}
                 .onDisappear {tuner.stopTuning()}
             }
