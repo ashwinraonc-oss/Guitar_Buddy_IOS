@@ -7,6 +7,9 @@
 
 import SwiftUI
 import AVFoundation
+import Lottie
+
+
 
 struct ContentView: View {
     @ObservedObject var recorder: AudioController
@@ -36,17 +39,17 @@ struct ContentView: View {
                                 .frame(width: 130 * xScale, height: 400 * yScale)
                                 .offset(x: 0, y: 255 * yScale)
                             // Fret lines
-                            Rectangle().fill(Color.black).frame(width: 130 * xScale, height: 4).offset(x: 0, y: 400 * yScale)
-                            Rectangle().fill(Color.black).frame(width: 130 * xScale, height: 4).offset(x: 0, y: 425 * yScale)
-                            Rectangle().fill(Color.black).frame(width: 130 * xScale, height: 4).offset(x: 0, y: 370 * yScale)
-                            Rectangle().fill(Color.black).frame(width: 130 * xScale, height: 4).offset(x: 0, y: 340 * yScale)
-                            Rectangle().fill(Color.black).frame(width: 130 * xScale, height: 4).offset(x: 0, y: 310 * yScale)
-                            Rectangle().fill(Color.black).frame(width: 130 * xScale, height: 4).offset(x: 0, y: 280 * yScale)
-                            Rectangle().fill(Color.black).frame(width: 130 * xScale, height: 4).offset(x: 0, y: 250 * yScale)
-                            Rectangle().fill(Color.black).frame(width: 130 * xScale, height: 4).offset(x: 0, y: 220 * yScale)
-                            Rectangle().fill(Color.black).frame(width: 130 * xScale, height: 4).offset(x: 0, y: 190 * yScale)
-                            Rectangle().fill(Color.black).frame(width: 130 * xScale, height: 4).offset(x: 0, y: 160 * yScale)
-                            Rectangle().fill(Color.black).frame(width: 130 * xScale, height: 4).offset(x: 0, y: 130 * yScale)
+                            Rectangle().fill(Color.black).frame(width: 130 * xScale, height: 4).offset(x: 0, y: 378 * yScale)
+                            Rectangle().fill(Color.black).frame(width: 130 * xScale, height: 4).offset(x: 0, y: 328 * yScale)
+                            Rectangle().fill(Color.black).frame(width: 130 * xScale, height: 4).offset(x: 0, y: 278 * yScale)
+                            Rectangle().fill(Color.black).frame(width: 130 * xScale, height: 4).offset(x: 0, y: 228 * yScale)
+                            Rectangle().fill(Color.black).frame(width: 130 * xScale, height: 4).offset(x: 0, y: 178 * yScale)
+                            Rectangle().fill(Color.black).frame(width: 130 * xScale, height: 4).offset(x: 0, y: 128 * yScale)
+//                            Rectangle().fill(Color.black).frame(width: 130 * xScale, height: 4).offset(x: 0, y: 250 * yScale)
+//                            Rectangle().fill(Color.black).frame(width: 130 * xScale, height: 4).offset(x: 0, y: 220 * yScale)
+//                            Rectangle().fill(Color.black).frame(width: 130 * xScale, height: 4).offset(x: 0, y: 190 * yScale)
+//                            Rectangle().fill(Color.black).frame(width: 130 * xScale, height: 4).offset(x: 0, y: 160 * yScale)
+//                            Rectangle().fill(Color.black).frame(width: 130 * xScale, height: 4).offset(x: 0, y: 130 * yScale)
                         }
 
                     if let chord = recorder.detectedChord {
@@ -74,11 +77,18 @@ struct ContentView: View {
                             .offset(y: 550 * yScale)
                     }
                     if recorder.isDetecting == true {
-                        ProgressView()
-                            .progressViewStyle(.circular)
-                            .scaleEffect(2)
-                            .tint(.black)
-                            .offset(y: 550 * yScale)
+//                        ProgressView()
+//                            .progressViewStyle(.circular)
+//                            .scaleEffect(2)
+//                            .tint(.black)
+//                            .offset(y: 550 * yScale)
+                        LottieView(animation:
+                                .named("loading"))
+                                .playing()
+                                .looping()
+                                .resizable()
+                                .frame(width: 130 * xScale, height: 130 * xScale)
+                                .offset(x: 0, y: 540 * yScale)
                     }
 
                     Spacer()
@@ -105,23 +115,42 @@ struct ContentView: View {
                                     width: recorder.isRecording ? 30 * xScale : 70 * xScale,
                                     height: recorder.isRecording ? 30 * xScale : 70 * xScale
                                 )
-                            
+                                .animation(.easeInOut(duration: 0.3), value: recorder.isRecording)
+//                            if recorder.isRecording{
+//                                LottieView(animation:
+//                                        .named("Ripple Red"))
+//                                        .playing()
+//                                        .resizable()
+//                                        .looping()
+//                                        .frame(width: 130 * xScale, height: 130 * xScale)
+//                            }
                         }
                     }
-                    .animation(.easeInOut(duration: 0.3), value: recorder.isRecording)
                     .scaleEffect(3.0)
                     .offset(x: 0, y: -380 * yScale)
                 }
                 .frame(maxWidth: .infinity)
+                
+                if recorder.isRecording{
+                    LottieView(animation:
+                            .named("Ripple Red"))
+                    .playing(.fromProgress(0,toProgress: 1, loopMode: .autoReverse))
+                            .resizable()
+                            .looping()
+                            .animationSpeed(1.5)
+                            .frame(width: 300 * xScale, height: 300 * xScale)
+                            .offset(x: 0, y: 0)
+                            .allowsHitTesting(false)
+                }
 
                 // String lines overlay (above button, taps pass through)
                 ZStack {
-                    Rectangle().fill(Color.white).frame(width: 4, height: 586 * yScale).offset(x: -50 * xScale, y: -190 * yScale)
-                    Rectangle().fill(Color.white).frame(width: 4, height: 605 * yScale).offset(x: -30 * xScale, y: -190 * yScale)
-                    Rectangle().fill(Color.white).frame(width: 4, height: 615 * yScale).offset(x: -10 * xScale, y: -190 * yScale)
-                    Rectangle().fill(Color.white).frame(width: 4, height: 615 * yScale).offset(x:  10 * xScale, y: -190 * yScale)
-                    Rectangle().fill(Color.white).frame(width: 4, height: 605 * yScale).offset(x:  30 * xScale, y: -190 * yScale)
-                    Rectangle().fill(Color.white).frame(width: 4, height: 586 * yScale).offset(x:  50 * xScale, y: -190 * yScale)
+                    Rectangle().fill(Color.white).frame(width: 4, height: 595 * yScale).offset(x: -58 * xScale, y: -199 * yScale)
+                    Rectangle().fill(Color.white).frame(width: 4, height: 605 * yScale).offset(x: -35 * xScale, y: -192 * yScale)
+                    Rectangle().fill(Color.white).frame(width: 4, height: 615 * yScale).offset(x: -11 * xScale, y: -190 * yScale)
+                    Rectangle().fill(Color.white).frame(width: 4, height: 615 * yScale).offset(x:  11 * xScale, y: -190 * yScale)
+                    Rectangle().fill(Color.white).frame(width: 4, height: 605 * yScale).offset(x:  35 * xScale, y: -192 * yScale)
+                    Rectangle().fill(Color.white).frame(width: 4, height: 595 * yScale).offset(x:  58 * xScale, y: -199 * yScale)
                 }
                 .allowsHitTesting(false)
 
@@ -134,9 +163,9 @@ struct ContentView: View {
                         ($0.filter { $0 != -1 && $0 != 0 }.min() ?? 0) <
                         ($1.filter { $0 != -1 && $0 != 0 }.min() ?? 0)
                     }
-                    FretBoardDiagramView(fretArray: sorted[voicingIndex], stringSpacing: 20 * xScale, fretSpacing: 30 * yScale)
+                    FretBoardDiagramView(fretArray: sorted[voicingIndex], stringSpacing: 23 * xScale, fretSpacing: 50 * yScale)
                         .scaleEffect(1.0)
-                        .offset(y: -39 * yScale)
+                        .offset(y: -40 * yScale)
                         .gesture(
                             DragGesture()
                                 .onEnded { value in

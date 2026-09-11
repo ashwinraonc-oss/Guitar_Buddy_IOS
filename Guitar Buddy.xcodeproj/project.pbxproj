@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		8549119B3054447E00EEFAAA /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = 8549119A3054447E00EEFAAA /* Lottie */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		850151353045CCAC00979D0C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +56,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8549119B3054447E00EEFAAA /* Lottie in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +117,7 @@
 			);
 			name = "Guitar Buddy";
 			packageProductDependencies = (
+				8549119A3054447E00EEFAAA /* Lottie */,
 			);
 			productName = "Guitar Buddy";
 			productReference = 850151273045CCAA00979D0C /* Guitar Buddy.app */;
@@ -195,6 +201,9 @@
 			);
 			mainGroup = 8501511E3045CCAA00979D0C;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				854911993054447E00EEFAAA /* XCRemoteSwiftPackageReference "lottie-ios" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 850151283045CCAA00979D0C /* Products */;
 			projectDirPath = "";
@@ -576,6 +585,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		854911993054447E00EEFAAA /* XCRemoteSwiftPackageReference "lottie-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/airbnb/lottie-ios/";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.6.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		8549119A3054447E00EEFAAA /* Lottie */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 854911993054447E00EEFAAA /* XCRemoteSwiftPackageReference "lottie-ios" */;
+			productName = Lottie;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 8501511F3045CCAA00979D0C /* Project object */;
 }

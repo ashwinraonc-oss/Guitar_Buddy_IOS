@@ -133,6 +133,11 @@ class AudioController: NSObject, ObservableObject, AVAudioRecorderDelegate {
             self.isDetecting = false
         }
     }
+    func reset(){
+        detectedChord = nil
+        voicings = []
+        detectedNotes = []
+    }
 }
 
 

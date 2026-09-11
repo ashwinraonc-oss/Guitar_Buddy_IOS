@@ -26,7 +26,7 @@ struct FretBoardDiagramView: View {
         let fontSize: CGFloat = stringSpacing * 1.5
         let lineWidth: CGFloat = stringSpacing * 0.15
 
-        VStack(spacing: stringSpacing * 0.2){
+        VStack(spacing: stringSpacing * -1){
             HStack(spacing: 0){
                 Text(" ")
                     .font(.system(size: fontSize))
@@ -50,7 +50,7 @@ struct FretBoardDiagramView: View {
                     .foregroundStyle(Color(red: 101/255, green: 67/255, blue: 33/255)) //fret label color
                     .frame(width: labelWidth)
                     .lineLimit(1)
-                    .opacity(usesAbsolutePos ? 1 : 1)
+                    .opacity(usesAbsolutePos ? 0 : 1)
                 Canvas { context, size in
                     let topPad: CGFloat = fretSpacing * 0.5
                     let availHeight = size.height - topPad
@@ -64,14 +64,14 @@ struct FretBoardDiagramView: View {
                         var path = Path()
                         path.move(to: CGPoint(x: x, y: topPad))
                         path.addLine(to: CGPoint(x: x, y: topPad + 4 * rowHeight))
-                        context.stroke(path, with: .color(.green), lineWidth: lineWidth)
+                        context.stroke(path, with: .color(Color(red: 255/255, green: 250/255, blue: 220/255)), lineWidth: lineWidth)
                     }
                     for i in 0..<5 { //fret lines
                         let y = topPad + CGFloat(i) * rowHeight
                         var path = Path()
                         path.move(to: CGPoint(x: startX, y: y))
                         path.addLine(to: CGPoint(x: endX, y: y))
-                        context.stroke(path, with: .color(.green), lineWidth: lineWidth)
+                        context.stroke(path, with: .color(Color(red: 255/255, green: 250/255, blue: 220/255)), lineWidth: lineWidth)
                     }
 
                     for (j, fret) in fretArray.enumerated() {
