@@ -10,7 +10,7 @@ import SwiftUI
 import Combine
 
 struct ProgressionView: View {
-    @ObservedObject var Progression: ProgressionController
+    @ObservedObject var progression: ProgressionController
     
     @State private var selectedRoot = "A"
     @State private var selectedQuality = "major"
@@ -39,31 +39,43 @@ struct ProgressionView: View {
             }
             Button("Add Chord"){
                 let chord = Chord(root: selectedRoot, quality: selectedQuality)
-                Progression.selectChord(chord)
+                progression.selectChord(chord)
             }
             Text("Suggested Chords:")
                 .foregroundStyle(Color.black)
+                .bold()
             LazyVGrid(columns: columns) {
-                ForEach(Progression.suggestions, id: \.chord.name) { suggestion in
+                ForEach(progression.suggestions, id: \.chord.name) { suggestion in
                     Button(suggestion.chord.name) {
-                        Progression.selectChord(suggestion.chord)
+                        progression.selectChord(suggestion.chord)
                     }
+                }
+            }
+            Text("Possible Progressions:")
+                .foregroundStyle(Color.black)
+                .bold()
+            ScrollView{
+                ForEach(progression.suggestedProgressions, id: \.templateName) {result in
+                    Text(result.chords.map {$0.name}.joined(separator: ", "))
+                        .foregroundStyle(Color.black)
                 }
             }
             Text("Current Progression:")
                 .foregroundStyle(Color.black)
-            Text("\(Progression.progression.map { $0.name }.joined(separator: " → "))")
+                .bold()
+            Text("\(progression.progression.map { $0.name }.joined(separator: " → "))")
                 .foregroundStyle(Color.black)
+            
             Button("Reset"){
-                Progression.reset()
+                progression.reset()
             }
         }
-        .padding(.bottom, 350)
+        .padding(.bottom, 300)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(red: 255/255, green: 250/255, blue: 220/255).ignoresSafeArea())
     }
 }
 
 #Preview {
-    ProgressionView(Progression: ProgressionController())
+    ProgressionView(progression: ProgressionController())
 }

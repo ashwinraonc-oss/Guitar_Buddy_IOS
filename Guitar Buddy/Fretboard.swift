@@ -10,6 +10,8 @@ import AVFoundation
 
 struct FretBoardDiagramView: View {
     let fretArray: [Int] //fret position for each string (6 strings)
+    var stringSpacing: CGFloat = 40
+    var fretSpacing: CGFloat = 74  // default for standalone use
     
     private var filteredNumbers: [Int] { fretArray.filter {$0 != -1 && $0 != 0}}
     private var minFret: Int {filteredNumbers.min() ?? 0}
@@ -17,16 +19,17 @@ struct FretBoardDiagramView: View {
     private var usesAbsolutePos: Bool {maxFret <= 3}
     
     var body: some View {
-        let scale: CGFloat = 1.3
-        let labelWidth: CGFloat = 45 * scale
-        let canvasWidth: CGFloat = 240 * scale  // 117 + 273 = 390, fits exactly
-        let canvasHeight: CGFloat = 300 * scale
-        let fontSize: CGFloat = 30 * scale
+        let labelWidth: CGFloat = stringSpacing * 2
+        let canvasWidth: CGFloat = stringSpacing * 6
+        let topPad: CGFloat = fretSpacing * 0.5
+        let canvasHeight: CGFloat = topPad + 5 * fretSpacing
+        let fontSize: CGFloat = stringSpacing * 1.5
+        let lineWidth: CGFloat = stringSpacing * 0.15
 
-        VStack(spacing: 4 * scale){
+        VStack(spacing: stringSpacing * 0.2){
             HStack(spacing: 0){
                 Text(" ")
-                    .font(.system(size: 14 * scale))
+                    .font(.system(size: fontSize))
                     .frame(width: labelWidth)
                     .opacity(0)
                 HStack(spacing: 0) {
@@ -34,21 +37,22 @@ struct FretBoardDiagramView: View {
                         Text(marker(for: fretArray[i]))
                             .font(.system(size: fontSize))
                             .frame(maxWidth: .infinity)
+                            .foregroundStyle(Color.red) //x's and o's color
                     }
                 }
-                .frame(width: canvasWidth)
+                .frame(width: canvasWidth, height: fontSize)
                 Spacer()
                     .frame(width: labelWidth)
             }
-            HStack(alignment: .top, spacing: 0.05 * scale){
+            HStack(alignment: .top, spacing: 0){
                 Text("\(minFret)")
                     .font(.system(size: fontSize))
+                    .foregroundStyle(Color(red: 101/255, green: 67/255, blue: 33/255)) //fret label color
                     .frame(width: labelWidth)
                     .lineLimit(1)
-                    .padding(.trailing, 0.2)
-                    .opacity(usesAbsolutePos ? 0 : 1)
+                    .opacity(usesAbsolutePos ? 1 : 1)
                 Canvas { context, size in
-                    let topPad: CGFloat = 15 * scale
+                    let topPad: CGFloat = fretSpacing * 0.5
                     let availHeight = size.height - topPad
                     let colWidth = size.width / 6
                     let rowHeight = availHeight / 5
@@ -60,14 +64,14 @@ struct FretBoardDiagramView: View {
                         var path = Path()
                         path.move(to: CGPoint(x: x, y: topPad))
                         path.addLine(to: CGPoint(x: x, y: topPad + 4 * rowHeight))
-                        context.stroke(path, with: .color(.white), lineWidth: 4 * scale)
+                        context.stroke(path, with: .color(.green), lineWidth: lineWidth)
                     }
                     for i in 0..<5 { //fret lines
                         let y = topPad + CGFloat(i) * rowHeight
                         var path = Path()
                         path.move(to: CGPoint(x: startX, y: y))
                         path.addLine(to: CGPoint(x: endX, y: y))
-                        context.stroke(path, with: .color(.white), lineWidth: 4 * scale)
+                        context.stroke(path, with: .color(.green), lineWidth: lineWidth)
                     }
 
                     for (j, fret) in fretArray.enumerated() {
@@ -77,7 +81,7 @@ struct FretBoardDiagramView: View {
                         : (CGFloat(fret - minFret) + 0.5) / 5
                         let x = (CGFloat(j) + 0.5) * colWidth
                         let y = topPad + rowFraction * availHeight
-                        let r: CGFloat = 10 * scale
+                        let r: CGFloat = stringSpacing * 0.35
                         let dotRect = CGRect(x: x - r, y: y - r, width: r * 2, height: r * 2)
                         context.fill(Path(ellipseIn: dotRect), with: .color(Color.yellow))
                     }
@@ -88,7 +92,7 @@ struct FretBoardDiagramView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .padding(.top, 30)
+        .padding(.top, stringSpacing)
     }
     
     private func marker(for fret: Int) -> String{

@@ -43,7 +43,8 @@ enum Vibe: String, CaseIterable {
     case tense = "Tense"
 }
 
-struct ProgressionTemplate {
+struct ProgressionTemplate: Hashable {
+    let id = UUID()
     let degrees: [Int]        // e.g. [1, 5, 6, 4]
     let keyQuality: String    // "major" or "minor"
     let vibes: Set<Vibe>
@@ -89,11 +90,19 @@ let progressionTemplates: [ProgressionTemplate] = [
     ProgressionTemplate(degrees: [1,7,6,5],   keyQuality: "minor", vibes: [.romantic], name: "i-VII-VI-V"),
 ]
 
+struct ProgressionResult{
+    let chords: [Chord]
+    let templateName: String
+    let vibes: Set<Vibe>
+}
+
 let majorIntervals = [0,2,4,5,7,9,11]
 let majorQualities = ["major","minor","minor","major","major","minor","dim"]
+let major7Qualities = ["maj7", "min7", "min7", "maj7", "dom7", "min7", "dim"]
 
 let minorIntervals = [0,2,3,5,7,8,10]
 let minorQualities = ["minor","dim","major","minor","minor","major","major"]
+let minor7Qualities = ["min7", "dim",  "maj7", "min7", "min7", "maj7", "dom7"]
 
 let notes = ["A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"]
 let scaleTypes = ["major","minor"]
@@ -104,6 +113,7 @@ let scaleTypes = ["major","minor"]
 class ProgressionController: NSObject, ObservableObject{
     @Published var suggestions: [ChordSuggestion] = []
     @Published var progression: [Chord] = []
+    @Published var suggestedProgressions: [ProgressionResult] = []
     private var lookupTable: [String: [(keyRoot: String, keyQuality: String, degree: Int)]] = [:]
     
     override init() {
@@ -140,9 +150,10 @@ class ProgressionController: NSObject, ObservableObject{
             }
         }
     }
-    func generateProgression(chord: String) {//generates chords that fit with the input chord and sort it by how well those chords fit with the input chord
+    func generateProgression(chord: String) {//generates list of chords that fit with the input chord and determines each one's frequency
         let keyContexts = lookupTable[chord]
         var chordWeights: [Chord: Int] = [:]
+        var chordContext: [Chord: (degree: Int, keyQuality: String)] = [:]
         for (keyRoot, keyQuality, _) in keyContexts ?? [] { //assigning weight values to chords in the context of the input chord
             let i = notes.firstIndex(of: keyRoot)!
             if keyQuality == "major"{
@@ -150,6 +161,9 @@ class ProgressionController: NSObject, ObservableObject{
                     let suggestedChord = Chord(root: notes[(i + interval)%12], quality: majorQualities[degree])
                     if suggestedChord.name != chord {
                         chordWeights[suggestedChord, default: 0] += 1
+                    }
+                    if chordContext[suggestedChord] == nil{
+                        chordContext[suggestedChord] = (degree: degree, keyQuality: keyQuality)
                     }
                 }
             }
@@ -159,25 +173,68 @@ class ProgressionController: NSObject, ObservableObject{
                     if suggestedChord.name != chord {
                         chordWeights[suggestedChord, default: 0] += 1
                     }
+                    if chordContext[suggestedChord] == nil{
+                        chordContext[suggestedChord] = (degree: degree, keyQuality: keyQuality)
+                    }
 
                 }
                 
             }
             
+            
         }
         suggestions = []
-        for chordWeight in chordWeights.sorted(by: {$0.value > $1.value}){
-            suggestions.append(ChordSuggestion(chord: chordWeight.key, vibes: [], weight: chordWeight.value))
+        for chordWeight in chordWeights.sorted(by: {$0.value > $1.value}){//looping through and sorting ChordWeights by frequency, and adding it to suggestion array that is shown to User.
+            let context = chordContext[chordWeight.key] ?? (degree: 0, keyQuality: "major")
+            suggestions.append(ChordSuggestion(chord: chordWeight.key,
+                                               vibes: [],
+                                               weight: chordWeight.value,
+                                               degree: context.degree,
+                                               keyQuality: context.keyQuality))
         }
-        print(suggestions.map { "\($0.chord.name) (weight: \($0.weight))" })
+
+        
     }
-    func selectChord(_ chord: Chord){
-        progression.append(chord)
-        generateProgression(chord: chord.name)
+    func filterProgressions(chord: String, vibe: Vibe?){
+        let allChords = progression.map{$0.name}
+        let keyContexts = lookupTable[chord] ?? []
+        var result: [ProgressionResult] = []
+        for (keyRoot, keyQuality, degree) in keyContexts{
+            let matches = progressionTemplates.filter { template in
+                guard template.keyQuality == keyQuality && template.degrees.contains(degree + 1) else { return false }
+                let templateChords = degreesToChords(root: keyRoot, template: template).map { $0.name }
+                return allChords.allSatisfy { templateChords.contains($0) }
+            }
+            for template in matches{
+                let chords = degreesToChords(root: keyRoot, template: template)
+                result.append(ProgressionResult(chords: chords, templateName: template.name, vibes: template.vibes))
+            }
+        }
+        var seen = Set<String>() //dedupe
+        result = result.filter { seen.insert($0.chords.map { $0.name }.joined()).inserted }
+        
+        if let vibe = vibe{
+            result = result.filter{$0.vibes.contains(vibe)}
+        }
+        suggestedProgressions = result
+    }
+    func degreesToChords(root: String, template: ProgressionTemplate) -> [Chord]{
+        let i = notes.firstIndex(of: root)!
+        let quality = template.keyQuality
+        let intervals = quality == "major" ? majorIntervals : minorIntervals
+        let qualities = quality == "major" ? majorQualities : minorQualities
+        var chords: [Chord] = []
+        for degree in template.degrees{
+            let chord = Chord(root: notes[(i + intervals[degree - 1])%12], quality: qualities[degree - 1])
+            chords.append(chord)
+        }
+        return chords
+        
     }
     func reset(){
         progression = []
         suggestions = []
+        suggestedProgressions = []
     }
     func baseQuality(_ quality: String) -> String {
         switch quality {
@@ -186,6 +243,12 @@ class ProgressionController: NSObject, ObservableObject{
         default: return quality
         }
     }
+    func selectChord(_ chord: Chord){
+        progression.append(chord)
+        generateProgression(chord: chord.name)
+        filterProgressions(chord: chord.name, vibe: nil)
+    }
+    
 }
 
 

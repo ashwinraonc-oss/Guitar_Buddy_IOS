@@ -10,6 +10,7 @@ import AVFoundation
 
 struct ContentView: View {
     @ObservedObject var recorder: AudioController
+    @State private var voicingIndex: Int = 0
 
     var body: some View {
         GeometryReader { geo in
@@ -17,6 +18,7 @@ struct ContentView: View {
             let h = geo.size.height
             let xScale = w / 390
             let yScale = h / 844
+            
 
             ZStack {
                 // 1. Yellow background (bottom)
@@ -45,13 +47,6 @@ struct ContentView: View {
                             Rectangle().fill(Color.black).frame(width: 130 * xScale, height: 4).offset(x: 0, y: 190 * yScale)
                             Rectangle().fill(Color.black).frame(width: 130 * xScale, height: 4).offset(x: 0, y: 160 * yScale)
                             Rectangle().fill(Color.black).frame(width: 130 * xScale, height: 4).offset(x: 0, y: 130 * yScale)
-                            // String lines
-                            Rectangle().fill(Color.white).frame(width: 4).offset(x: -50 * xScale, y: 250 * yScale)
-                            Rectangle().fill(Color.white).frame(width: 4).offset(x: -30 * xScale, y: 250 * yScale)
-                            Rectangle().fill(Color.white).frame(width: 4).offset(x:  30 * xScale, y: 250 * yScale)
-                            Rectangle().fill(Color.white).frame(width: 4).offset(x:  50 * xScale, y: 250 * yScale)
-                            Rectangle().fill(Color.white).frame(width: 4).offset(x:  10 * xScale, y: 250 * yScale)
-                            Rectangle().fill(Color.white).frame(width: 4).offset(x: -10 * xScale, y: 250 * yScale)
                         }
 
                     if let chord = recorder.detectedChord {
@@ -119,10 +114,44 @@ struct ContentView: View {
                 }
                 .frame(maxWidth: .infinity)
 
+                // String lines overlay (above button, taps pass through)
+                ZStack {
+                    Rectangle().fill(Color.white).frame(width: 4, height: 586 * yScale).offset(x: -50 * xScale, y: -190 * yScale)
+                    Rectangle().fill(Color.white).frame(width: 4, height: 605 * yScale).offset(x: -30 * xScale, y: -190 * yScale)
+                    Rectangle().fill(Color.white).frame(width: 4, height: 615 * yScale).offset(x: -10 * xScale, y: -190 * yScale)
+                    Rectangle().fill(Color.white).frame(width: 4, height: 615 * yScale).offset(x:  10 * xScale, y: -190 * yScale)
+                    Rectangle().fill(Color.white).frame(width: 4, height: 605 * yScale).offset(x:  30 * xScale, y: -190 * yScale)
+                    Rectangle().fill(Color.white).frame(width: 4, height: 586 * yScale).offset(x:  50 * xScale, y: -190 * yScale)
+                }
+                .allowsHitTesting(false)
+
                 // Border overlay
                 Rectangle()
                     .stroke(Color.black, lineWidth: 2)
                     .ignoresSafeArea()
+                if let voicings = recorder.voicings, !voicings.isEmpty {
+                    let sorted = voicings.sorted {
+                        ($0.filter { $0 != -1 && $0 != 0 }.min() ?? 0) <
+                        ($1.filter { $0 != -1 && $0 != 0 }.min() ?? 0)
+                    }
+                    FretBoardDiagramView(fretArray: sorted[voicingIndex], stringSpacing: 20 * xScale, fretSpacing: 30 * yScale)
+                        .scaleEffect(1.0)
+                        .offset(y: -39 * yScale)
+                        .gesture(
+                            DragGesture()
+                                .onEnded { value in
+                                    if value.translation.width < -50 {
+                                        voicingIndex = min(voicingIndex + 1, sorted.count - 1)
+                                    } else if value.translation.width > 50 {
+                                        voicingIndex = max(voicingIndex - 1, 0)
+                                    }
+                                }
+                        )
+                        .onChange(of: recorder.voicings){_ in
+                            voicingIndex = 0
+                }
+                        
+                    }
             }
             .frame(width: w, height: h)
         }
@@ -130,6 +159,8 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView(recorder: AudioController())
+    let recorder = AudioController()
+    recorder.voicings = [[0, 2, 2, 1, 0, 0]]  // Am as a test
+    return ContentView(recorder: recorder)
 }
 

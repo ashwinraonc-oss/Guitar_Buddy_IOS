@@ -20,15 +20,15 @@ struct RootView: View {
             TabView(selection: $selectedTab){
                 ContentView(recorder: recorder)
                     .tag(0)
-                VoicingsView(recorder: recorder)
+                ProgressionView(progression: progression)
                     .tag(1)
-                ProgressionView(Progression: progression)
+                TunerView(tuner: tuner)
                     .tag(2)
                 Text("Tab4")
                     .tag(3)
                 Text("Tab5")
                     .tag(4)
-                TunerView(tuner: tuner)
+                Text("Tab6")
                     .tag(5)
             } .tabViewStyle(.page(indexDisplayMode: .never)).ignoresSafeArea()
             VStack{
