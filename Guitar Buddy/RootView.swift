@@ -9,6 +9,7 @@ import SwiftUI
 import AVFoundation
 
 struct RootView: View {
+    @State private var isLoading = false
     @State var selectedTab = 0
     @State var dimmed = false
     @StateObject private var recorder = AudioController()
