@@ -13,7 +13,7 @@ struct Guitar_BuddyApp: App {
     var body: some Scene {
         WindowGroup {
             ZStack {
-                RootView()
+                RootViewUpdated()
                 SplashView()
                     .ignoresSafeArea()
                     .opacity(showSplash ? 1 : 0)
