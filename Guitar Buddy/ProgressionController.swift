@@ -7,6 +7,11 @@
 
 import AVFoundation
 import Combine
+import UIKit
+
+struct VoicingLookup: Codable {//return struct from chord lookup function
+    let voicings: [[Int]]
+}
 
 struct Chord: Hashable {
     let root: String
@@ -105,12 +110,11 @@ let minorQualities = ["minor","dim","major","minor","minor","major","major"]
 let minor7Qualities = ["min7", "dim",  "maj7", "min7", "min7", "maj7", "dom7"]
 
 let notes = ["A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"]
+let notes_backend = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
 let scaleTypes = ["major","minor"]
 
-
-
-
 class ProgressionController: NSObject, ObservableObject{
+    @Published var chordVoicings: [String: [[Int]]] = [:]
     @Published var suggestions: [ChordSuggestion] = []
     @Published var progression: [Chord] = []
     @Published var suggestedProgressions: [ProgressionResult] = []
@@ -176,7 +180,7 @@ class ProgressionController: NSObject, ObservableObject{
                     if chordContext[suggestedChord] == nil{
                         chordContext[suggestedChord] = (degree: degree, keyQuality: keyQuality)
                     }
-
+                    
                 }
                 
             }
@@ -192,7 +196,7 @@ class ProgressionController: NSObject, ObservableObject{
                                                degree: context.degree,
                                                keyQuality: context.keyQuality))
         }
-
+        
         
     }
     func filterProgressions(chord: String, vibe: Vibe?){
@@ -235,6 +239,8 @@ class ProgressionController: NSObject, ObservableObject{
         progression = []
         suggestions = []
         suggestedProgressions = []
+        chordVoicings = [:]
+        
     }
     func baseQuality(_ quality: String) -> String {
         switch quality {
@@ -247,8 +253,33 @@ class ProgressionController: NSObject, ObservableObject{
         progression.append(chord)
         generateProgression(chord: chord.name)
         filterProgressions(chord: chord.name, vibe: nil)
+        Task { try? await self.lookupVoicings(chord: chord) }
     }
-    
+    func lookupVoicings(chord: Chord) async throws{
+        let root_num = notes_backend.firstIndex(of: chord.root)
+        let quality = chord.quality
+        //constructing URL to send root and quality to backend
+        guard var backendURLComponent = URLComponents(string: "https://chord-ghost.onrender.com/lookup") else{return}
+        backendURLComponent.queryItems = [
+            URLQueryItem(name: "root", value: "\(root_num ?? 0)"),
+            URLQueryItem(name: "quality", value: quality.capitalized)
+        ]
+        let backendURL = backendURLComponent.url!
+        print("Fetching: \(backendURL)")
+        
+        let (data, response) = try await URLSession.shared.data(from: backendURL)
+        
+        guard let response = response as? HTTPURLResponse, response.statusCode == 200 else{return}
+        do{
+            let result = try JSONDecoder().decode(VoicingLookup.self, from: data)
+            print(result.voicings)
+            DispatchQueue.main.async{
+                self.chordVoicings[chord.name] = result.voicings
+            }
+        } catch {
+            print("error finding chord diagram")
+        }
+    }
 }
 
 

@@ -29,7 +29,7 @@ class AudioController: NSObject, ObservableObject, AVAudioRecorderDelegate {
     
     override init(){
         super.init()
-        guard !ProcessInfo.processInfo.environment.keys.contains("XCODE_RUNNING_FOR_PREVIEWS") else { return }
+//        guard !ProcessInfo.processInfo.environment.keys.contains("XCODE_RUNNING_FOR_PREVIEWS") else { return }
         recordingSession = AVAudioSession.sharedInstance()
         
         do{

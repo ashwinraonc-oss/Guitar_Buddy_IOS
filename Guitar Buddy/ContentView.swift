@@ -72,20 +72,20 @@ struct ContentView: View {
 
                     if let chord = recorder.detectedChord {
                         VStack {
-                            Text("Chord Detected:")
+                            Text("Chord:")
                             Text(chord)
-                                .foregroundStyle(Color(red: 101/255, green: 67/255, blue: 33/255))
+                                .foregroundStyle(Color(red: 88/255, green: 217/255, blue: 99/255))
                             if let notes = recorder.detectedNotes {
-                                HStack {
+                                VStack {
                                     Text("Notes:")
-                                    Text(notes.joined(separator: ", "))
-                                        .foregroundStyle(Color(red: 101/255, green: 67/255, blue: 33/255))
+                                    Text("\(notes.joined(separator: ", "))")
+                                        .foregroundStyle(Color(red: 88/255, green: 217/255, blue: 99/255))
                                 }
                             }
                         }
                         .font(.system(size: 28 * xScale))
                         .bold()
-                        .offset(y: 585 * yScale)
+                        .offset(x: 0, y: 595 * yScale)
                         .modifier(ShimmerModifier())
                     }
 
