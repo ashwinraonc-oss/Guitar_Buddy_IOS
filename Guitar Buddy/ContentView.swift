@@ -54,12 +54,12 @@ struct ContentView: View {
                 // Background
                 Color(red: 210/255, green: 125/255, blue: 45/255)
                     .ignoresSafeArea()
-
+                
                 // Main content
                 VStack {
                     Text("Chord Detector")
                         .font(.system(size: 40 * xScale))
-                        .foregroundStyle(Color(red: 9/255, green: 21/255, blue: 64/255))
+                        .foregroundStyle(.clear)
                         .bold()
                         .offset(y: 5500 * yScale)
                         .background(alignment: .bottom) {
@@ -67,6 +67,21 @@ struct ContentView: View {
                                 .fill(Color(red: 92/255, green: 67/255, blue: 33/255))
                                 .frame(width: 130 * xScale, height: 400 * yScale)
                                 .offset(x: 0, y: 255 * yScale)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 20)
+                                        .stroke(Color.black, lineWidth: 9)
+                                        .offset(x: 0, y: 255 * yScale)
+                                )
+                            RoundedRectangle(cornerRadius: 20)
+                                .fill(Color(red: 92/255, green: 67/255, blue: 33/255))
+                                .frame(width: 130 * xScale, height: 400 * yScale)
+                                .offset(x: 0, y: 255 * yScale)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 20)
+                                        .fill(Color.black)
+                                        .frame(width: 130 * xScale, height: 400 * yScale)
+                                        .offset(x: 5, y: 260 * yScale)
+                                )
                             Rectangle().fill(Color.black).frame(width: 130 * xScale, height: 4).offset(x: 0, y: 378 * yScale)
                             Rectangle().fill(Color.black).frame(width: 130 * xScale, height: 4).offset(x: 0, y: 328 * yScale)
                             Rectangle().fill(Color.black).frame(width: 130 * xScale, height: 4).offset(x: 0, y: 278 * yScale)
@@ -74,13 +89,22 @@ struct ContentView: View {
                             Rectangle().fill(Color.black).frame(width: 130 * xScale, height: 4).offset(x: 0, y: 178 * yScale)
                             Rectangle().fill(Color.black).frame(width: 130 * xScale, height: 4).offset(x: 0, y: 128 * yScale)
                         }
+                    
 
                     if let chord = recorder.detectedChord {
                         VStack {
                             HStack{
                                 Text("Chord:")
                                 Text(chord)
-                                    .foregroundStyle(Color(red: 88/255, green: 217/255, blue: 99/255))
+                                    .foregroundStyle(Color(red: 9/255, green: 21/255, blue: 64/255))
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 8)
+                                    .background(Color(red: 88/255, green: 217/255, blue: 99/255))
+                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .stroke(Color.black, lineWidth: 3)
+                                    )
                                 Button {                                          // ← add from here
                                     guard let voicingPlayed = recorder.voicings, let firstVoicing = voicingPlayed.first else {
                                         print("No Chord Detected")
@@ -97,7 +121,15 @@ struct ContentView: View {
                                 HStack {
                                     Text("Notes:")
                                     Text("\(notes.joined(separator: ", "))")
-                                        .foregroundStyle(Color(red: 88/255, green: 217/255, blue: 99/255))
+                                        .foregroundStyle(Color(red: 9/255, green: 21/255, blue: 64/255))
+                                        .padding(.horizontal, 16)
+                                        .padding(.vertical, 8)
+                                        .background(Color(red: 88/255, green: 217/255, blue: 99/255))
+                                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 12)
+                                                .stroke(Color.black, lineWidth: 3)
+                                        )
                                 }
                             }
                         }
@@ -105,6 +137,22 @@ struct ContentView: View {
                         .bold()
                         .offset(x: 0, y: 595 * yScale)
                         .modifier(ShimmerModifier())
+                    }
+                    if recorder.detectedChord == nil && recorder.isDetecting == false{
+                        Text("Detect Chord")
+                            .font(.system(size: 30, weight: .bold))
+                            .padding(.top, 10)
+                            .padding(.bottom, 10)
+                            .foregroundStyle(Color(red: 9/255, green: 21/255, blue: 64/255))
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 0)
+                            .background(Color(red: 88/255, green: 217/255, blue: 99/255))
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(Color.black, lineWidth: 3)
+                            )
+                            .offset(x: 0, y: 600 * yScale)
                     }
 
                     if recorder.failedConnection == true {
@@ -120,9 +168,21 @@ struct ContentView: View {
                             .playing()
                             .looping()
                             .resizable()
+                            .configure { view in
+                                view.setValueProvider(
+                                    ColorValueProvider(LottieColor(r: 88/255, g: 217/255, b: 99/255, a: 1)),
+                                    keypath: AnimationKeypath(keypath: "**.Color")
+                                )
+                                view.setValueProvider(
+                                    ColorValueProvider(LottieColor(r: 0, g: 0, b: 0, a: 1)),
+                                    keypath: AnimationKeypath(keypath: "ellipse.**.Color")
+                                )
+                            }
                             .frame(width: 130 * xScale, height: 130 * xScale)
-                            .offset(x: 0, y: 540 * yScale)
+                            .offset(x: 0, y: 570 * yScale)
+                            .padding(.top, 10)
                     }
+                    
 
                     Spacer()
 
@@ -137,8 +197,9 @@ struct ContentView: View {
                             Circle()
                                 .fill(Color.black)
                                 .frame(width: 70 * xScale, height: 70 * xScale)
+                                
                             Circle()
-                                .stroke(Color.black, lineWidth: 10)
+                                .stroke(Color.black, lineWidth: 10.5)
                                 .frame(width: 73 * xScale, height: 73 * xScale)
                             Circle()
                                 .stroke(Color(red: 210/255, green: 125/255, blue: 45/255), lineWidth: 4)
@@ -172,6 +233,15 @@ struct ContentView: View {
                 // String lines overlay
                 ZStack {
                     RoundedRectangle(cornerRadius: 20).fill(Color.black)
+                        .frame(width: 166 * xScale, height: 36 * yScale)
+                        .offset(x: 0, y: 200 * yScale)
+                        .background(
+                            RoundedRectangle(cornerRadius: 20)
+                                .fill(Color.black.opacity(0.8))
+                                .frame(width: 165 * xScale, height: 30 * yScale)
+                                .offset(x: 0 * xScale, y: 200 * yScale)
+                        )
+                    RoundedRectangle(cornerRadius: 20).fill(Color(red: 92/255, green: 67/255, blue: 33/255))
                         .frame(width: 160 * xScale, height: 28 * yScale)
                         .offset(x: 0, y: 200 * yScale)
                     Circle().fill(Color(red: 237/255, green: 219/255, blue: 171/255)).frame(width: 15 * xScale, height: 18 * xScale)

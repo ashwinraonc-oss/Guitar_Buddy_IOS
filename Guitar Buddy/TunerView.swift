@@ -37,8 +37,17 @@ struct TunerView: View {
             VStack{
                 Text("Tuner")
                     .font(.system(size: 30, weight: .bold))
-                    .padding(.top, 60)
-                    .padding(.bottom, 50)
+                    .padding(.top, 10)
+                    .padding(.bottom, 10)
+                    .foregroundStyle(Color(red: 9/255, green: 21/255, blue: 64/255))
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 0)
+                    .background(Color.yellow)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.black, lineWidth: 3)
+                    )
                 ZStack {
                     ForEach(0..<6, id: \.self) { i in
                         let angle = noteAngles[i] * .pi / 180
@@ -86,7 +95,7 @@ struct TunerView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .offset(y: -200)
+        .offset(y: -180)
         .background(Color(red: 191/255, green: 64/255, blue: 191/255).ignoresSafeArea())
 
     }
