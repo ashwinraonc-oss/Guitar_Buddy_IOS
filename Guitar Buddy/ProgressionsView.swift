@@ -14,6 +14,7 @@ struct ProgressionView: View {
     @State private var selectedRoot = "A"
     @State private var selectedQuality = "major"
     @State private var displayedProgressions: [ProgressionResult] = []
+    @StateObject private var chordPlayer = ChordPlayer()
     
     
 //    let xScale = w / 390
@@ -77,7 +78,14 @@ struct ProgressionView: View {
                                             .font(Font.system(size: 20))
                                         FretBoardDiagramView(fretArray: first, stringSpacing: 15, fretSpacing: 25)
                                             .fixedSize()
-                                            .background(Color(red: 92/255, green: 67/255, blue: 33/255).cornerRadius(8))
+                                            .background(Color(red: 210/255, green: 125/255, blue: 45/255).cornerRadius(8))
+                                        Button {                                          // ← add from here
+                                            chordPlayer.playChord(fretArray: first)
+                                        } label: {
+                                            Image(systemName: "play.circle.fill")
+                                                .font(.system(size: 24))
+                                                .foregroundStyle(.black)
+                                        }
                                     }
                                 }
                             }

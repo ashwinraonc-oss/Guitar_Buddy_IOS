@@ -37,6 +37,7 @@ struct ShimmerModifier: ViewModifier {
 struct ContentView: View {
     @ObservedObject var recorder: AudioController
     @State private var voicingIndex: Int = 0
+    @StateObject private var chordPlayer = ChordPlayer()
 
     var body: some View {
         GeometryReader { geo in
@@ -44,6 +45,10 @@ struct ContentView: View {
             let h = geo.size.height
             let xScale = w / 390
             let yScale = h / 844
+            
+//            guard let voicingPlayed = recorder.voicings.first else {
+//                print("No Chord Detected")
+//            }
 
             ZStack {
                 // Background
@@ -72,11 +77,24 @@ struct ContentView: View {
 
                     if let chord = recorder.detectedChord {
                         VStack {
-                            Text("Chord:")
-                            Text(chord)
-                                .foregroundStyle(Color(red: 88/255, green: 217/255, blue: 99/255))
+                            HStack{
+                                Text("Chord:")
+                                Text(chord)
+                                    .foregroundStyle(Color(red: 88/255, green: 217/255, blue: 99/255))
+                                Button {                                          // ← add from here
+                                    guard let voicingPlayed = recorder.voicings, let firstVoicing = voicingPlayed.first else {
+                                        print("No Chord Detected")
+                                        return
+                                    }
+                                    chordPlayer.playChord(fretArray: firstVoicing)
+                                } label: {
+                                    Image(systemName: "play.circle.fill")
+                                        .font(.system(size: 24))
+                                        .foregroundStyle(.black)
+                                }
+                            }
                             if let notes = recorder.detectedNotes {
-                                VStack {
+                                HStack {
                                     Text("Notes:")
                                     Text("\(notes.joined(separator: ", "))")
                                         .foregroundStyle(Color(red: 88/255, green: 217/255, blue: 99/255))
@@ -194,7 +212,7 @@ struct ContentView: View {
                         ($0.filter { $0 != -1 && $0 != 0 }.min() ?? 0) <
                         ($1.filter { $0 != -1 && $0 != 0 }.min() ?? 0)
                     }
-                    FretBoardDiagramView(fretArray: sorted[voicingIndex], stringSpacing: 23 * xScale, fretSpacing: 50 * yScale)
+                    FretBoardDiagramView(fretArray: sorted[min(voicingIndex, sorted.count - 1)], stringSpacing: 23 * xScale, fretSpacing: 50 * yScale)
                         .offset(y: -40 * yScale)
                         .gesture(
                             DragGesture()
@@ -208,6 +226,11 @@ struct ContentView: View {
                         )
                         .onChange(of: recorder.voicings) { _ in
                             voicingIndex = 0
+                        }
+                        .onChange(of: recorder.voicings){newVoicings in
+                            guard let voicings = newVoicings, !voicings.isEmpty else {return}
+                            chordPlayer.playChord(fretArray: voicings[0])
+                            
                         }
                 }
             }

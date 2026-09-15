@@ -24,9 +24,9 @@ struct TunerView: View {
     }
     
     var body: some View{
-        let scale = 1.4
-        let arcDiameter = 300.0 * scale
-        let labelRadius = 120.0 * scale
+        let scale = 1.6
+        let arcDiameter = 250.0 * scale
+        let labelRadius = 110 * scale
         let tickRadius = 95.0 * scale
         let needleLength = 90.0 * scale
         let centerOffset = 75.0 * scale
@@ -43,7 +43,7 @@ struct TunerView: View {
                     ForEach(0..<6, id: \.self) { i in
                         let angle = noteAngles[i] * .pi / 180
                         Text(guitarNotes[i])
-                            .font(.system(size: 16 * scale, weight: .bold))
+                            .font(.system(size: 13 * scale, weight: .bold))
                             .foregroundColor(Color(red: 212/255, green: 230/255, blue: 135/255))
                             .offset(x: labelRadius * sin(angle), y: -labelRadius * cos(angle) + centerOffset)
                     }
@@ -73,13 +73,15 @@ struct TunerView: View {
                         .animation(.spring(response: 0.3, dampingFraction: 0.7), value: needleAngle)
                 }
                 .frame(width: arcDiameter, height: arcDiameter / 2 + 5)
-                .clipped()
                 HStack{
                     Text("\(tuner.detectedNote)")
                 }
                 .font(.system(size: 60, weight: .bold))
-                .offset(y:-20)
-                .onAppear{tuner.startTuning()}
+                .offset(y:-10)
+                .onAppear{
+                    guard !ProcessInfo.processInfo.environment.keys.contains("XCODE_RUNNING_FOR_PREVIEWS") else { return }
+                    tuner.startTuning()
+                }
                 .onDisappear {tuner.stopTuning()}
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
