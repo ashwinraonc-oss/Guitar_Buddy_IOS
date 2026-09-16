@@ -23,7 +23,7 @@ struct SplashView: View {
                     .playing()
                     .looping()
                     .resizable()
-                    .offset(y: -7 * yScale)
+                    .offset(y: -10 * yScale)
             }
         }
     }

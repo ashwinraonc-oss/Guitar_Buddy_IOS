@@ -25,65 +25,131 @@ struct ProgressionView: View {
     
     let columns = Array(repeating: GridItem(.flexible()), count: 2)
     var body: some View {
-        VStack(spacing:50){
+        VStack(spacing:55){
             VStack{
+                
+                Text("Create")
+                    .font(.system(size: 25, weight: .bold))
+                    .foregroundStyle(.black)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(Color(red: 88/255, green: 217/255, blue: 99/255).opacity(1))
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.black, lineWidth: 3)
+                    )
+                    .padding(.bottom, 5)
+                    .padding(.top, 10)
                 HStack{
                     Picker("Root", selection: $selectedRoot){
                         ForEach(rootOptions, id: \.self){ root in
-                            Text(root).tag(root)
-                                .foregroundStyle(Color.black)
+                            Text(root)
+                                .font(.system(size: 20, weight: .bold))
+                                .foregroundStyle(Color(red: 9/255, green: 21/255, blue: 64/255))
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 1)
+                                .background(Color(red: 255/255, green: 199/255, blue: 55/255))
+                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .stroke(Color.black, lineWidth: 2)
+                                )
+                                .tag(root)
                         }
                     }
                     .pickerStyle(.wheel)
                     Picker("Quality", selection: $selectedQuality){
                         ForEach(qualityOptions, id: \.self){ quality in
-                            Text(quality).tag(quality)
-                                .foregroundStyle(Color.black)
+                            Text(quality)
+                                .font(.system(size: 20, weight: .bold))
+                                .foregroundStyle(Color(red: 9/255, green: 21/255, blue: 64/255))
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 2)
+                                .background(Color(red: 255/255, green: 111/255, blue: 97/255))
+                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .stroke(Color.black, lineWidth: 2)
+                                )
+                                .tag(quality)
                         }
                     }
                     .pickerStyle(.wheel)
                 }
-                Button("Add Chord"){
+                let maxChordsInProgression = 9
+                Button{
+                    guard progression.progression.count < maxChordsInProgression else { return }
                     let chord = Chord(root: selectedRoot, quality: selectedQuality)
                     progression.selectChord(chord)
                     if displayedProgressions.isEmpty {
                         displayedProgressions = Array(progression.suggestedProgressions.shuffled().prefix(5))
                     }
                     
+                }label: {
+                    Text("Add Chord to Progression")
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundStyle(.black)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                        .background(Color(red: 88/255, green: 217/255, blue: 99/255).opacity(1))
+                        .clipShape(Capsule())
+                        .overlay(
+                            Capsule()
+                                .stroke(Color.black, lineWidth: 3)
+                        )
                 }
+                .padding(.bottom, 2)
+                .padding(.top, 10)
+                .opacity(progression.progression.count >= maxChordsInProgression ? 0.4 : 1.0)
             }
-            .frame(height: 150)
+            .frame(height: 220)
             .clipped()
             ZStack(alignment: .bottom) {
-                VStack(spacing: 10) {
-    //            Text("Current Progression:")
-    //                .foregroundStyle(Color.black)
-    //                .bold()
-    //                .padding()
-    //            Text("\(progression.progression.map { $0.name }.joined(separator: " → "))")
-    //                .foregroundStyle(Color.black)
-    //                .font(.system(size: 30))
-                    Text("Current Progression:")
-                        .foregroundStyle(Color.black)
-                        .bold()
-                    ScrollView(.horizontal) {
-                        HStack {
-                            ForEach(progression.progression, id: \.name) { chord in
+                VStack(spacing: 25) {
+//                    Text("Current Progression:")
+//                        .foregroundStyle(Color.black)
+//                        .bold()
+                    GeometryReader { geo in
+                        let itemsPerRow = 3
+                        let rowCount = max(1, Int(ceil(Double(progression.progression.count) / Double(itemsPerRow))))
+                        let itemWidth = geo.size.width / CGFloat(itemsPerRow)
+                        let itemHeight = geo.size.height / CGFloat(rowCount)
+
+                        // reference sizes at scale = 1: stringSpacing 20, label 20pt, button 24pt
+                        let referenceWidth: CGFloat = 200   // stringSpacing(20) * 10
+                        let referenceHeight: CGFloat = 255  // label + diagram + button at reference scale
+                        let scale = max(min(itemWidth / referenceWidth, itemHeight / referenceHeight), 0.3)
+
+                        let stringSpacing = 20 * scale
+                        let fretSpacing = 30 * scale
+                        let labelFontSize = 30 * scale
+                        let buttonIconSize = 30 * scale
+
+                        LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: itemsPerRow), spacing: 4) {
+                            ForEach(Array(progression.progression.enumerated()), id: \.offset) { index, chord in
                                 if let voicings = progression.chordVoicings[chord.name],
                                    let first = voicings.first {
-                                    VStack {
+                                    VStack(spacing: 4 * scale) {
                                         Text(chord.name)
                                             .foregroundStyle(Color.black)
                                             .bold()
-                                            .font(Font.system(size: 20))
-                                        FretBoardDiagramView(fretArray: first, stringSpacing: 15, fretSpacing: 25)
+                                            .font(Font.system(size: labelFontSize))
+                                        FretBoardDiagramView(fretArray: first, stringSpacing: stringSpacing, fretSpacing: fretSpacing, dotColor: .red)
                                             .fixedSize()
-                                            .background(Color(red: 210/255, green: 125/255, blue: 45/255).cornerRadius(8))
+                                            .padding(-4)
+                                            .background(Color(red: 255/255, green: 199/255, blue: 55/255))
+                                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 12)
+                                                    .stroke(Color.black, lineWidth: 3)
+                                            )
+
                                         Button {                                          // ← add from here
                                             chordPlayer.playChord(fretArray: first)
                                         } label: {
                                             Image(systemName: "play.circle.fill")
-                                                .font(.system(size: 24))
+                                                .font(.system(size: buttonIconSize))
                                                 .foregroundStyle(.black)
                                         }
                                     }
@@ -91,7 +157,7 @@ struct ProgressionView: View {
                             }
                         }
                     }
-                    .frame(height: 200)
+                    .frame(height: 255)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
                 VStack(alignment: .center) {
@@ -106,8 +172,17 @@ struct ProgressionView: View {
     //                    }
     //                }
                     Text("Recommended Progressions:")
+                        .font(.system(size: 18,weight: .bold))
                         .foregroundStyle(Color.black)
                         .bold()
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 10)
+                        .background(Color(red: 255/255, green: 199/255, blue: 55/255))
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color.black, lineWidth: 3)
+                        )
                     ZStack(alignment: .top) {
                         Canvas { context, size in
                             let lineColor = Color(red: 140/255, green: 120/255, blue: 80/255)
@@ -137,11 +212,23 @@ struct ProgressionView: View {
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.bottom, 60)
-                Button("Reset Progression") {
+                Button {
                     progression.reset()
                     displayedProgressions = []
+                }label: {
+                    Text("Reset")
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                        .background(Color(red: 235/255, green: 51/255, blue: 34/255).opacity(1))
+                        .clipShape(Capsule())
+                        .overlay(
+                            Capsule()
+                                .stroke(Color.black, lineWidth: 3)
+                        )
                 }
-                    .padding(.bottom, 20)
+                .padding(.bottom, 10)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }.background(Color(red: 255/255, green: 250/255, blue: 220/255).ignoresSafeArea())

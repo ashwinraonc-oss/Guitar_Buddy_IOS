@@ -12,6 +12,7 @@ struct FretBoardDiagramView: View {
     let fretArray: [Int] //fret position for each string (6 strings)
     var stringSpacing: CGFloat = 40
     var fretSpacing: CGFloat = 74  // default for standalone use
+    var dotColor: Color = .yellow
     
     private var filteredNumbers: [Int] { fretArray.filter {$0 != -1 && $0 != 0}}
     private var minFret: Int {filteredNumbers.min() ?? 0}
@@ -83,7 +84,7 @@ struct FretBoardDiagramView: View {
                         let y = topPad + rowFraction * availHeight
                         let r: CGFloat = stringSpacing * 0.35
                         let dotRect = CGRect(x: x - r, y: y - r, width: r * 2, height: r * 2)
-                        context.fill(Path(ellipseIn: dotRect), with: .color(Color.yellow))
+                        context.fill(Path(ellipseIn: dotRect), with: .color(dotColor))
                     }
                 }
                 .frame(width: canvasWidth, height: canvasHeight)

@@ -15,15 +15,17 @@ struct ShimmerModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .overlay(
-                LinearGradient(
-                    stops: [
-                        .init(color: .clear, location: phase - 0.3),
-                        .init(color: .white.opacity(0.7), location: phase),
-                        .init(color: .clear, location: phase + 0.3),
-                    ],
-                    startPoint: .leading,
-                    endPoint: .trailing
-                )
+                Group{
+                    LinearGradient(
+                        stops: [
+                            .init(color: .clear, location: phase - 0.3),
+                            .init(color: .white.opacity(0.7), location: phase),
+                            .init(color: .clear, location: phase + 0.3),
+                        ],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                }
                 .blendMode(.plusLighter)
             )
             .onAppear {
@@ -282,26 +284,62 @@ struct ContentView: View {
                         ($0.filter { $0 != -1 && $0 != 0 }.min() ?? 0) <
                         ($1.filter { $0 != -1 && $0 != 0 }.min() ?? 0)
                     }
-                    FretBoardDiagramView(fretArray: sorted[min(voicingIndex, sorted.count - 1)], stringSpacing: 23 * xScale, fretSpacing: 50 * yScale)
-                        .offset(y: -40 * yScale)
-                        .gesture(
-                            DragGesture()
-                                .onEnded { value in
-                                    if value.translation.width < -50 {
-                                        voicingIndex = min(voicingIndex + 1, sorted.count - 1)
-                                    } else if value.translation.width > 50 {
-                                        voicingIndex = max(voicingIndex - 1, 0)
+                    HStack(alignment: .top){
+                        Button {
+                            voicingIndex = max(voicingIndex - 1, 0)
+                        } label: {
+                            Image(systemName: "chevron.left")
+                                .font(.system(size: 20, weight: .bold))
+                                .foregroundStyle(.black)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 8)
+                                .background(Color(red: 88/255, green: 217/255, blue: 99/255).opacity(1))
+                                .clipShape(Capsule())
+                                .overlay(
+                                    Capsule()
+                                        .stroke(Color.black, lineWidth: 3)
+                                )
+                        } .opacity(voicingIndex == 0 ? 0.5 : 1)
+                        .padding(.top, 150 * yScale)
+                        FretBoardDiagramView(fretArray: sorted[min(voicingIndex, sorted.count - 1)], stringSpacing: 23 * xScale, fretSpacing: 50 * yScale)
+                            .gesture(
+                                DragGesture()
+                                    .onEnded { value in
+                                        if value.translation.width < -50 {
+                                            voicingIndex = min(voicingIndex + 1, sorted.count - 1)
+                                        } else if value.translation.width > 50 {
+                                            voicingIndex = max(voicingIndex - 1, 0)
+                                        }
                                     }
-                                }
-                        )
-                        .onChange(of: recorder.voicings) { _ in
-                            voicingIndex = 0
+                            )
+                            .onChange(of: recorder.voicings) { _ in
+                                voicingIndex = 0
+                            }
+                            .onChange(of: recorder.voicings){newVoicings in
+                                guard let voicings = newVoicings, !voicings.isEmpty else {return}
+                                chordPlayer.playChord(fretArray: voicings[0])
+                                
+                            }
+                        Button {
+                            voicingIndex = min(voicingIndex + 1, sorted.count - 1)
+                        } label: {
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 20, weight: .bold))
+                                .foregroundStyle(.black)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 8)
+                                .background(Color(red: 88/255, green: 217/255, blue: 99/255).opacity(1))
+                                .clipShape(Capsule())
+                                .overlay(
+                                    Capsule()
+                                        .stroke(Color.black, lineWidth: 3)
+                                )
                         }
-                        .onChange(of: recorder.voicings){newVoicings in
-                            guard let voicings = newVoicings, !voicings.isEmpty else {return}
-                            chordPlayer.playChord(fretArray: voicings[0])
-                            
-                        }
+                        .padding(.top, 150 * yScale)
+                        .opacity(voicingIndex == voicings.count - 1 ? 0.5 : 1)
+                    }.offset(y: -40 * yScale)
+                        .padding(.horizontal, 150 * xScale)
+
                 }
             }
             .frame(width: w, height: h)
