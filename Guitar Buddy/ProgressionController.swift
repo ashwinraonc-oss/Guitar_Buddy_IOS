@@ -137,6 +137,11 @@ class ProgressionController: NSObject, ObservableObject{
                             quality: majorQualities[degree]
                         )
                         lookupTable[chord.name, default: []].append((keyRoot: note, keyQuality: scale, degree: degree))
+                        let seventhChord = Chord(
+                            root: notes[(i + interval)%12],
+                            quality: major7Qualities[degree]
+                        )
+                        lookupTable[seventhChord.name, default: []].append((keyRoot: note, keyQuality: scale, degree: degree))
                         
                     }
                 }
@@ -147,6 +152,11 @@ class ProgressionController: NSObject, ObservableObject{
                             quality: minorQualities[degree]
                         )
                         lookupTable[chord.name, default: []].append((keyRoot: note, keyQuality: scale, degree: degree))
+                        let seventhChord = Chord(
+                            root: notes[(i + interval)%12],
+                            quality: minor7Qualities[degree]
+                        )
+                        lookupTable[seventhChord.name, default: []].append((keyRoot: note, keyQuality: scale, degree: degree))
                         
                     }
                     
@@ -200,7 +210,11 @@ class ProgressionController: NSObject, ObservableObject{
         
     }
     func filterProgressions(chord: String, vibe: Vibe?){
-        let allChords = progression.map{$0.name}
+        let allChords = progression.map{ Chord(root: $0.root, quality: baseQuality($0.quality)).name }
+        var addedQualityByRoot: [String: String] = [:]
+        for c in progression {
+            addedQualityByRoot[c.root] = c.quality
+        }
         let keyContexts = lookupTable[chord] ?? []
         var result: [ProgressionResult] = []
         for (keyRoot, keyQuality, degree) in keyContexts{
@@ -210,7 +224,7 @@ class ProgressionController: NSObject, ObservableObject{
                 return allChords.allSatisfy { templateChords.contains($0) }
             }
             for template in matches{
-                let chords = degreesToChords(root: keyRoot, template: template)
+                let chords = degreesToDisplay(root: keyRoot, template: template, addedQualityByRoot: addedQualityByRoot)
                 result.append(ProgressionResult(chords: chords, templateName: template.name, vibes: template.vibes))
             }
         }
@@ -235,6 +249,35 @@ class ProgressionController: NSObject, ObservableObject{
         return chords
         
     }
+    func degreesToSeventhChords(root: String, template: ProgressionTemplate) -> [Chord]{
+        let i = notes.firstIndex(of: root)!
+        let quality = template.keyQuality
+        let intervals = quality == "major" ? majorIntervals : minorIntervals
+        let qualities = quality == "major" ? major7Qualities : minor7Qualities
+        var chords: [Chord] = []
+        for degree in template.degrees{
+            let seventhChord = Chord(root: notes[(i + intervals[degree - 1])%12], quality: qualities[degree - 1])
+            chords.append(seventhChord)
+        }
+        return chords
+    }
+    func degreesToDisplay(root: String, template: ProgressionTemplate, addedQualityByRoot: [String: String]) -> [Chord]{
+        let i = notes.firstIndex(of: root)!
+        let quality = template.keyQuality
+        let intervals = quality == "major" ? majorIntervals : minorIntervals
+        let qualities = quality == "major" ? majorQualities : minorQualities
+        var chords: [Chord] = []
+        for degree in template.degrees{
+            let chordRoot = notes[(i + intervals[degree - 1])%12]
+            let defaultQuality = qualities[degree - 1]
+            var displayQuality = defaultQuality
+            if let addedQuality = addedQualityByRoot[chordRoot], baseQuality(addedQuality) == defaultQuality {
+                displayQuality = addedQuality
+            }
+            chords.append(Chord(root: chordRoot, quality: displayQuality))
+        }
+        return chords
+    }
     func reset(){
         progression = []
         suggestions = []
@@ -256,13 +299,15 @@ class ProgressionController: NSObject, ObservableObject{
         Task { try? await self.lookupVoicings(chord: chord) }
     }
     func lookupVoicings(chord: Chord) async throws{
+        var front_to_back_map = ["maj7": "Maj7", "min7": "m7", "major": "Major", "minor": "Minor"]
         let root_num = notes_backend.firstIndex(of: chord.root)
         let quality = chord.quality
         //constructing URL to send root and quality to backend
         guard var backendURLComponent = URLComponents(string: "https://chord-ghost.onrender.com/lookup") else{return}
+        let quality_cap = front_to_back_map[quality]
         backendURLComponent.queryItems = [
             URLQueryItem(name: "root", value: "\(root_num ?? 0)"),
-            URLQueryItem(name: "quality", value: quality.capitalized)
+            URLQueryItem(name: "quality", value: quality_cap)
         ]
         let backendURL = backendURLComponent.url!
         print("Fetching: \(backendURL)")

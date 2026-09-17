@@ -21,13 +21,12 @@ struct ProgressionView: View {
 //    let yScale = h / 844
     
     let rootOptions = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#","A", "A#", "B"]
-    let qualityOptions = ["major", "minor"]
+    let qualityOptions = ["major", "maj7", "minor", "min7"]
     
     let columns = Array(repeating: GridItem(.flexible()), count: 2)
     var body: some View {
         VStack(spacing:55){
             VStack{
-                
                 Text("Create")
                     .font(.system(size: 25, weight: .bold))
                     .foregroundStyle(.black)
@@ -46,10 +45,10 @@ struct ProgressionView: View {
                         ForEach(rootOptions, id: \.self){ root in
                             Text(root)
                                 .font(.system(size: 20, weight: .bold))
-                                .foregroundStyle(Color(red: 9/255, green: 21/255, blue: 64/255))
+                                .foregroundStyle(Color(red: 255/255, green: 245/255, blue: 220/255))
                                 .padding(.horizontal, 10)
                                 .padding(.vertical, 1)
-                                .background(Color(red: 255/255, green: 199/255, blue: 55/255))
+                                .background(Color(red: 144/255, green: 213/255, blue: 255/255))
                                 .clipShape(RoundedRectangle(cornerRadius: 10))
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 10)
@@ -63,10 +62,10 @@ struct ProgressionView: View {
                         ForEach(qualityOptions, id: \.self){ quality in
                             Text(quality)
                                 .font(.system(size: 20, weight: .bold))
-                                .foregroundStyle(Color(red: 9/255, green: 21/255, blue: 64/255))
+                                .foregroundStyle(Color(red: 255/255, green: 245/255, blue: 220/255))
                                 .padding(.horizontal, 10)
                                 .padding(.vertical, 2)
-                                .background(Color(red: 255/255, green: 111/255, blue: 97/255))
+                                .background(Color(red: 250/255, green: 80/255, blue: 83/255))
                                 .clipShape(RoundedRectangle(cornerRadius: 10))
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 10)
@@ -82,9 +81,9 @@ struct ProgressionView: View {
                     guard progression.progression.count < maxChordsInProgression else { return }
                     let chord = Chord(root: selectedRoot, quality: selectedQuality)
                     progression.selectChord(chord)
-                    if displayedProgressions.isEmpty {
-                        displayedProgressions = Array(progression.suggestedProgressions.shuffled().prefix(5))
-                    }
+//                    if displayedProgressions.isEmpty {
+//                        displayedProgressions = Array(progression.suggestedProgressions.shuffled().prefix(5))
+//                    }
                     
                 }label: {
                     Text("Add Chord to Progression")
@@ -199,11 +198,12 @@ struct ProgressionView: View {
                         .frame(height: 140)
                         ScrollView {
                             VStack(spacing: 0) {
-                                ForEach(displayedProgressions, id: \.templateName) { result in
+                                ForEach(progression.suggestedProgressions, id: \.templateName) { result in
                                     Text(result.chords.map { $0.name }.joined(separator: ", "))
                                         .foregroundStyle(Color.black)
                                         .frame(maxWidth: .infinity, minHeight: 28, alignment: .center)
                                         .padding(.horizontal, 8)
+                                        .bold()
                                 }
                             }
                         }
@@ -214,6 +214,7 @@ struct ProgressionView: View {
                 .padding(.bottom, 60)
                 Button {
                     progression.reset()
+                    progression.suggestedProgressions = []
                     displayedProgressions = []
                 }label: {
                     Text("Reset")
@@ -231,7 +232,7 @@ struct ProgressionView: View {
                 .padding(.bottom, 10)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-        }.background(Color(red: 255/255, green: 250/255, blue: 220/255).ignoresSafeArea())
+        }.background(Color(red: 255/255, green: 245/255, blue: 220/255).ignoresSafeArea())
     }
 
 }
