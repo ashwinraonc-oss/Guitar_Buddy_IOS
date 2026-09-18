@@ -12,15 +12,11 @@ import Combine
 struct TunerView: View {
     @ObservedObject var tuner: TunerController
     var needleAngle: Double {
-        guard tuner.detectedNote != "--" else { return 0.0 }
-        let positions = ["A": -45.0, "D": -15.0, "G": 15.0, "B": 45.0]
-        let base: Double
-        if tuner.detectedNote == "E" {
-            base = tuner.detectedFrequency > 250 ? 75.0 : -75.0
-        } else {
-            base = positions[tuner.detectedNote] ?? 0.0
-        }
-        return base + Double(tuner.centsOff) * 0.3
+        guard let idx = tuner.closestString else { return 0.0 }
+        let base = -75.0 + 30.0 * Double(idx)
+        let clampedCents = max(min(Double(tuner.centsOff), 150), -150)   // clamp to ±1.5 semitones
+        let offset = clampedCents * (15.0 / 150.0)                        // map ±150 cents → ±15°
+        return base + offset
     }
     
     var body: some View{
@@ -31,7 +27,7 @@ struct TunerView: View {
         let needleLength = 90.0 * scale
         let centerOffset = 75.0 * scale
 
-        let guitarNotes = ["E", "A", "D", "G", "B", "E"]
+        let guitarNotes = tuner.selectedTuning.stringNames
         let noteAngles = [-75.0, -45.0, -15.0, 15.0, 45.0, 75.0]
         VStack{
             VStack{
@@ -87,6 +83,77 @@ struct TunerView: View {
                 }
                 .font(.system(size: 60, weight: .bold))
                 .offset(y:-10)
+                Text(tuner.tuningDirection)
+                    .font(.system(size: 20, weight: .bold))
+                    .foregroundStyle(tuner.inTune ? Color(red: 88/255, green: 217/255, blue: 99/255) : .white)
+                
+                HStack{
+                    Button {
+                        tuner.selectedTuning = standardTuning
+                    }label: {
+                        Text("Standard")
+                            .font(.system(size: 15, weight: .bold))
+                            .foregroundStyle(.black)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
+                            .background(Color(.yellow))
+                            .clipShape(Capsule())
+                            .overlay(
+                                Capsule()
+                                    .stroke(Color.black, lineWidth: 3)
+                            )
+                    }
+                    .opacity(tuner.selectedTuning.name == "Standard" ? 0.5 : 1)
+                    Button {
+                        tuner.selectedTuning = dadgadTuning
+                    }label: {
+                        Text("DADGAD")
+                            .font(.system(size: 15, weight: .bold))
+                            .foregroundStyle(.black)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
+                            .background(Color(.yellow))
+                            .clipShape(Capsule())
+                            .overlay(
+                                Capsule()
+                                    .stroke(Color.black, lineWidth: 3)
+                            )
+                    }
+                    .opacity(tuner.selectedTuning.name == "DADGAD" ? 0.5 : 1)
+                    Button {
+                        tuner.selectedTuning = dadfceTuning
+                    }label: {
+                        Text("DADFCE")
+                            .font(.system(size: 15, weight: .bold))
+                            .foregroundStyle(.black)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
+                            .background(Color(.yellow))
+                            .clipShape(Capsule())
+                            .overlay(
+                                Capsule()
+                                    .stroke(Color.black, lineWidth: 3)
+                            )
+                    }
+                    .opacity(tuner.selectedTuning.name == "DADFCE" ? 0.5 : 1)
+                    Button {
+                        tuner.selectedTuning = dropDTuning
+                    }label: {
+                        Text("Drop D")
+                            .font(.system(size: 15, weight: .bold))
+                            .foregroundStyle(.black)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
+                            .background(Color(.yellow))
+                            .clipShape(Capsule())
+                            .overlay(
+                                Capsule()
+                                    .stroke(Color.black, lineWidth: 3)
+                            )
+                    }
+                    .opacity(tuner.selectedTuning.name == "Drop D" ? 0.5 : 1)
+                }
+                .padding(.top, 50)
                 .onAppear{
                     guard !ProcessInfo.processInfo.environment.keys.contains("XCODE_RUNNING_FOR_PREVIEWS") else { return }
                     tuner.startTuning()
@@ -95,7 +162,7 @@ struct TunerView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .offset(y: -180)
+        .offset(y: -150)
         .background(Color(red: 191/255, green: 64/255, blue: 191/255).ignoresSafeArea())
 
     }

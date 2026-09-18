@@ -9,13 +9,31 @@ import SwiftUI
 import Accelerate
 import Combine
 
+struct Tuning{
+    let name: String
+    let stringMIDI: [Int]
+    var stringNames: [String]{
+        let notes = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"]
+        return stringMIDI.map{notes[(($0%12) + 12)%12]}
+    }
+}
+//Tunings
+let standardTuning = Tuning(name: "Standard", stringMIDI: [40, 45, 50, 55, 59, 64])       // E A D G B E
+let dropDTuning  = Tuning(name: "Drop D",   stringMIDI: [38, 45, 50, 55, 59, 64])       // D A D G B E
+let dadgadTuning = Tuning(name: "DADGAD",   stringMIDI: [38, 45, 50, 55, 57, 62])       // D A D G A D
+let dadfceTuning = Tuning(name: "DADFCE",   stringMIDI: [38, 45, 50, 53, 60, 64])       // D A D F C E — adjust
+
 class TunerController: NSObject, ObservableObject{
     private var engine = AVAudioEngine()
     nonisolated (unsafe) private var rollingBuffer: [Float] = []
     @Published var detectedNote: String = "--"
+    @Published var tuningDirection: String = "--"
+    @Published var inTune: Bool = false
     @Published var detectedFrequency: Float = 0
     @Published var isRunning = false
     @Published var centsOff = Float(0)
+    @Published var selectedTuning: Tuning = standardTuning
+    @Published var closestString: Int? = nil
     private var consecutiveCount = 0
     private var pendingNote = "--"
     
@@ -51,6 +69,8 @@ class TunerController: NSObject, ObservableObject{
             DispatchQueue.main.async {
                 self.detectedNote = "--"
                 self.centsOff = 0
+                self.tuningDirection = "--"
+                self.closestString = nil
             }
             return
         }
@@ -63,11 +83,23 @@ class TunerController: NSObject, ObservableObject{
 
         let sampleRate = Float(buffer.format.sampleRate)
         let frequency = yin(rollingBuffer, sampleRate: sampleRate)
+        
         guard frequency > 0 else { return }
 
         let note = frequencyToNote(frequency)
         let centsOff = frequencyToCents(frequency)
-
+        let targetFrequencies = selectedTuning.stringMIDI.map{440 * pow(2, (Float($0) - 69) / 12)}
+        let centsDiff = targetFrequencies.map{1200 * log2(frequency / $0)}
+        let closestIndex = centsDiff.indices.min(by: { abs(centsDiff[$0]) < abs(centsDiff[$1]) })!
+        let diffToClosest = centsDiff[closestIndex]
+        let direction: String
+        if abs(diffToClosest) < 5 {
+            direction = "In Tune!"
+        } else if diffToClosest > 0 {
+            direction = "Tune Down"
+        } else {
+            direction = "Tune Up"
+        }
         DispatchQueue.main.async {
             if note == self.pendingNote {
                 self.consecutiveCount += 1
@@ -82,7 +114,10 @@ class TunerController: NSObject, ObservableObject{
                 self.detectedNote = note
                 self.detectedFrequency = frequency
             }
-            self.centsOff = self.centsOff * 0.5 + centsOff * 0.5
+            self.closestString = closestIndex
+            self.tuningDirection = direction
+            self.inTune = (direction == "In Tune!")
+            self.centsOff = self.centsOff * 0.5 + centsDiff[closestIndex] * 0.5
         }
     }
 

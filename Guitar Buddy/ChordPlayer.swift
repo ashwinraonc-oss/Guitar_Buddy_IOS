@@ -16,6 +16,7 @@ class ChordPlayer: ObservableObject{
     init(){
         engine.attach(sampler)
         engine.connect(sampler, to: engine.mainMixerNode, format: nil)
+        sampler.volume = 1.0
         try? engine.start()
         loadSoundFont()
         

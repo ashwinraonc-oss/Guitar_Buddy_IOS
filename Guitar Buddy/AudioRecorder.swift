@@ -33,7 +33,7 @@ class AudioController: NSObject, ObservableObject, AVAudioRecorderDelegate {
         recordingSession = AVAudioSession.sharedInstance()
         
         do{
-            try recordingSession.setCategory(.playAndRecord, mode: .default)
+            try recordingSession.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker])
             try recordingSession.setActive(true)
             AVAudioApplication.requestRecordPermission{[weak self] hasPermission in
                 DispatchQueue.main.async{
