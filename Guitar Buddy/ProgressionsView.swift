@@ -77,38 +77,38 @@ struct ProgressionView: View {
                     .pickerStyle(.wheel)
                 }
                 let maxChordsInProgression = 9
-                Button{
-                    guard progression.progression.count < maxChordsInProgression else { return }
-                    let chord = Chord(root: selectedRoot, quality: selectedQuality)
-                    progression.selectChord(chord)
-//                    if displayedProgressions.isEmpty {
-//                        displayedProgressions = Array(progression.suggestedProgressions.shuffled().prefix(5))
-//                    }
-                    
-                }label: {
-                    Text("Add Chord to Progression")
-                        .font(.system(size: 18, weight: .bold))
-                        .foregroundStyle(.black)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 8)
-                        .background(Color(red: 88/255, green: 217/255, blue: 99/255).opacity(1))
-                        .clipShape(Capsule())
-                        .overlay(
-                            Capsule()
-                                .stroke(Color.black, lineWidth: 3)
-                        )
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 0), count: 1), spacing: 10){
+                    Button{
+                        guard progression.progression.count < maxChordsInProgression else { return }
+                        let chord = Chord(root: selectedRoot, quality: selectedQuality)
+                        progression.selectChord(chord)
+    //                    if displayedProgressions.isEmpty {
+    //                        displayedProgressions = Array(progression.suggestedProgressions.shuffled().prefix(5))
+    //                    }
+                        
+                    }label: {
+                        Text("Add Chord to Progression")
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundStyle(.black)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
+                            .background(Color(red: 88/255, green: 217/255, blue: 99/255).opacity(1))
+                            .clipShape(Capsule())
+                            .overlay(
+                                Capsule()
+                                    .stroke(Color.black, lineWidth: 3)
+                            )
+                    }
+                    .padding(.bottom, 2)
+                    .padding(.top, 10)
+                    .opacity(progression.progression.count >= maxChordsInProgression ? 0.4 : 1.0)
                 }
-                .padding(.bottom, 2)
-                .padding(.top, 10)
-                .opacity(progression.progression.count >= maxChordsInProgression ? 0.4 : 1.0)
+
             }
             .frame(height: 220)
             .clipped()
             ZStack(alignment: .bottom) {
                 VStack(spacing: 25) {
-//                    Text("Current Progression:")
-//                        .foregroundStyle(Color.black)
-//                        .bold()
                     GeometryReader { geo in
                         let itemsPerRow = 3
                         let rowCount = max(1, Int(ceil(Double(progression.progression.count) / Double(itemsPerRow))))
@@ -212,24 +212,44 @@ struct ProgressionView: View {
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.bottom, 60)
-                Button {
-                    progression.reset()
-                    progression.suggestedProgressions = []
-                    displayedProgressions = []
-                }label: {
-                    Text("Reset")
-                        .font(.system(size: 18, weight: .bold))
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 8)
-                        .background(Color(red: 235/255, green: 51/255, blue: 34/255).opacity(1))
-                        .clipShape(Capsule())
-                        .overlay(
-                            Capsule()
-                                .stroke(Color.black, lineWidth: 3)
-                        )
+                HStack{
+                    Button {
+                        progression.reset()
+                        progression.suggestedProgressions = []
+                        displayedProgressions = []
+                    }label: {
+                        Text("Reset")
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
+                            .background(Color(red: 235/255, green: 51/255, blue: 34/255).opacity(1))
+                            .clipShape(Capsule())
+                            .overlay(
+                                Capsule()
+                                    .stroke(Color.black, lineWidth: 3)
+                            )
+                    }
+                    .padding(.bottom, 10)
+                    Button {
+                        progression.savedProgressions.append(progression.progression)
+                        print(progression.savedProgressions)
+                    }label: {
+                        Text("Save Progression")
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
+                            .background(Color(red: 235/255, green: 51/255, blue: 34/255).opacity(1))
+                            .clipShape(Capsule())
+                            .overlay(
+                                Capsule()
+                                    .stroke(Color.black, lineWidth: 3)
+                            )
+                    }
+                    .padding(.bottom, 10)
                 }
-                .padding(.bottom, 10)
+
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }.background(Color(red: 255/255, green: 245/255, blue: 220/255).ignoresSafeArea())

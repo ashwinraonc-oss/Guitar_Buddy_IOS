@@ -8,6 +8,7 @@
 import AVFoundation
 import AudioToolbox
 import Combine
+import SwiftUI
 
 class ChordPlayer: ObservableObject{
     private let engine = AVAudioEngine()
@@ -19,7 +20,6 @@ class ChordPlayer: ObservableObject{
         sampler.volume = 1.0
         try? engine.start()
         loadSoundFont()
-        
     }
     
     private func loadSoundFont(){
@@ -49,6 +49,24 @@ class ChordPlayer: ObservableObject{
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
             playedNotes.forEach { self.sampler.stopNote($0, onChannel: 0) }
+        }
+    }
+    func playMIDI(midiArray: [Int]) {
+        let midiArraySorted = midiArray.sorted()
+        print("playMIDI called at \(Date())")
+        print(midiArraySorted.count)
+        var playNotes: [UInt8] = []
+        for (i, fret) in midiArraySorted.enumerated(){
+            let note = UInt8(fret)
+            playNotes.append(note)
+            DispatchQueue.main.asyncAfter(deadline: .now() + Double(i) * 0.1) {
+                print("closure firing at \(Date())")
+                self.sampler.startNote(note, withVelocity: 120, onChannel: 0)
+                print("startNote returned at \(Date())")
+            }
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+            playNotes.forEach { self.sampler.stopNote($0, onChannel: 0) }
         }
     }
 }

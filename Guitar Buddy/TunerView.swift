@@ -87,7 +87,7 @@ struct TunerView: View {
                     .font(.system(size: 20, weight: .bold))
                     .foregroundStyle(tuner.inTune ? Color(red: 88/255, green: 217/255, blue: 99/255) : .white)
                 
-                HStack{
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: -13), count: 4), spacing: 10){
                     Button {
                         tuner.selectedTuning = standardTuning
                     }label: {
@@ -104,6 +104,22 @@ struct TunerView: View {
                             )
                     }
                     .opacity(tuner.selectedTuning.name == "Standard" ? 0.5 : 1)
+                    Button {
+                        tuner.selectedTuning = dropDTuning
+                    }label: {
+                        Text("Drop D")
+                            .font(.system(size: 15, weight: .bold))
+                            .foregroundStyle(.black)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
+                            .background(Color(.yellow))
+                            .clipShape(Capsule())
+                            .overlay(
+                                Capsule()
+                                    .stroke(Color.black, lineWidth: 3)
+                            )
+                    }
+                    .opacity(tuner.selectedTuning.name == "Drop D" ? 0.5 : 1)
                     Button {
                         tuner.selectedTuning = dadgadTuning
                     }label: {
@@ -137,10 +153,10 @@ struct TunerView: View {
                     }
                     .opacity(tuner.selectedTuning.name == "DADFCE" ? 0.5 : 1)
                     Button {
-                        tuner.selectedTuning = dropDTuning
+                        tuner.selectedTuning = dropHalfStepTuning
                     }label: {
-                        Text("Drop D")
-                            .font(.system(size: 15, weight: .bold))
+                        Text("Half Step Down")
+                            .font(.system(size: 12, weight: .bold))
                             .foregroundStyle(.black)
                             .padding(.horizontal, 12)
                             .padding(.vertical, 8)
@@ -151,8 +167,9 @@ struct TunerView: View {
                                     .stroke(Color.black, lineWidth: 3)
                             )
                     }
-                    .opacity(tuner.selectedTuning.name == "Drop D" ? 0.5 : 1)
+                    .opacity(tuner.selectedTuning.name == "Eb" ? 0.5 : 1)
                 }
+                .padding(.horizontal, 10)
                 .padding(.top, 50)
                 .onAppear{
                     guard !ProcessInfo.processInfo.environment.keys.contains("XCODE_RUNNING_FOR_PREVIEWS") else { return }
@@ -160,9 +177,9 @@ struct TunerView: View {
                 }
                 .onDisappear {tuner.stopTuning()}
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         }
-        .offset(y: -150)
+        .offset(y: 0)
         .background(Color(red: 191/255, green: 64/255, blue: 191/255).ignoresSafeArea())
 
     }

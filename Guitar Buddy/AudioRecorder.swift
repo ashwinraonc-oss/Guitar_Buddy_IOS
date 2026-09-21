@@ -15,6 +15,7 @@ struct DetectionResult: Codable {
     let note_names: [String]
     let root: Int?
     let voicing: [[Int]]
+    let midi_notes: [Int]
 }
 
 class AudioController: NSObject, ObservableObject, AVAudioRecorderDelegate {
@@ -26,6 +27,7 @@ class AudioController: NSObject, ObservableObject, AVAudioRecorderDelegate {
     @Published var isDetecting = false
     @Published var isRecording = false
     @Published var failedConnection = false
+    @Published var midiNotes: [Int] = []
     
     override init(){
         super.init()
@@ -121,6 +123,7 @@ class AudioController: NSObject, ObservableObject, AVAudioRecorderDelegate {
                         self.voicings = result.voicing
                         self.detectedNotes = result.note_names
                         self.isDetecting = false
+                        self.midiNotes = result.midi_notes
                     }
                 }
             }.resume()
@@ -137,6 +140,7 @@ class AudioController: NSObject, ObservableObject, AVAudioRecorderDelegate {
         detectedChord = nil
         voicings = []
         detectedNotes = []
+        midiNotes = []
     }
 }
 

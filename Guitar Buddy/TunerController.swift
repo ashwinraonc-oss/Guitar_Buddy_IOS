@@ -21,7 +21,9 @@ struct Tuning{
 let standardTuning = Tuning(name: "Standard", stringMIDI: [40, 45, 50, 55, 59, 64])       // E A D G B E
 let dropDTuning  = Tuning(name: "Drop D",   stringMIDI: [38, 45, 50, 55, 59, 64])       // D A D G B E
 let dadgadTuning = Tuning(name: "DADGAD",   stringMIDI: [38, 45, 50, 55, 57, 62])       // D A D G A D
-let dadfceTuning = Tuning(name: "DADFCE",   stringMIDI: [38, 45, 50, 53, 60, 64])       // D A D F C E — adjust
+let dadfceTuning = Tuning(name: "DADFCE",   stringMIDI: [38, 45, 50, 53, 60, 64])       // D A D F C E
+let dropHalfStepTuning = Tuning(name: "Eb",   stringMIDI: [39, 44, 49, 54, 58, 63])// Eb Ab Db Gb Bb Eb
+
 
 class TunerController: NSObject, ObservableObject{
     private var engine = AVAudioEngine()
@@ -65,7 +67,7 @@ class TunerController: NSObject, ObservableObject{
         let samples = Array(UnsafeBufferPointer(start: channelData[0], count: frameLength))
 
         let rms = sqrt(samples.map { $0 * $0 }.reduce(0, +) / Float(frameLength))
-        guard rms > 0.001 else {
+        guard rms > 0.003 else {
             DispatchQueue.main.async {
                 self.detectedNote = "--"
                 self.centsOff = 0
@@ -107,7 +109,7 @@ class TunerController: NSObject, ObservableObject{
                 self.pendingNote = note
                 self.consecutiveCount = 1
             }
-            if self.consecutiveCount >= 3 {
+            if self.consecutiveCount >= 2 {
                 if self.detectedNote != note {
                     self.centsOff = 0
                 }

@@ -96,7 +96,8 @@ struct ContentView: View {
                     if let chord = recorder.detectedChord {
                         VStack {
                             HStack{
-                                Text("Chord:")
+                                Text("Chord Detected:").font(.system(size: 25))
+                                
                                 Text(chord)
                                     .foregroundStyle(Color(red: 9/255, green: 21/255, blue: 64/255))
                                     .padding(.horizontal, 16)
@@ -107,7 +108,7 @@ struct ContentView: View {
                                         RoundedRectangle(cornerRadius: 12)
                                             .stroke(Color.black, lineWidth: 3)
                                     )
-                                Button {                                          // ← add from here
+                                Button {
                                     guard let voicingPlayed = recorder.voicings, let firstVoicing = voicingPlayed.first else {
                                         print("No Chord Detected")
                                         return
@@ -121,7 +122,7 @@ struct ContentView: View {
                             }
                             if let notes = recorder.detectedNotes {
                                 HStack {
-                                    Text("Notes:")
+                                    Text("Notes Played:").font(.system(size: 25))
                                     Text("\(notes.joined(separator: ", "))")
                                         .foregroundStyle(Color(red: 9/255, green: 21/255, blue: 64/255))
                                         .padding(.horizontal, 16)
@@ -132,6 +133,14 @@ struct ContentView: View {
                                             RoundedRectangle(cornerRadius: 12)
                                                 .stroke(Color.black, lineWidth: 3)
                                         )
+                                    Button {
+                                        print(recorder.midiNotes.count)
+                                        chordPlayer.playMIDI(midiArray: recorder.midiNotes)
+                                    } label: {
+                                        Image(systemName: "play.circle.fill")
+                                            .font(.system(size: 24))
+                                            .foregroundStyle(.black)
+                                    }
                                 }
                             }
                         }

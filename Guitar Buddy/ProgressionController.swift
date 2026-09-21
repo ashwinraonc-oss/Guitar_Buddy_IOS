@@ -118,6 +118,7 @@ class ProgressionController: NSObject, ObservableObject{
     @Published var suggestions: [ChordSuggestion] = []
     @Published var progression: [Chord] = []
     @Published var suggestedProgressions: [ProgressionResult] = []
+    @Published var savedProgressions: [[Chord]] = []
     private var lookupTable: [String: [(keyRoot: String, keyQuality: String, degree: Int)]] = [:]
     
     override init() {
