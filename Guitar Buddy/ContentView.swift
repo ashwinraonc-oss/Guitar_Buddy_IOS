@@ -150,7 +150,7 @@ struct ContentView: View {
                         .modifier(ShimmerModifier())
                     }
                     if recorder.detectedChord == nil && recorder.isDetecting == false{
-                        Text("Detect Chord")
+                        Text("Detect")
                             .font(.system(size: 30, weight: .bold))
                             .padding(.top, 10)
                             .padding(.bottom, 10)

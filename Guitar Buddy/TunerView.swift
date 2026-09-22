@@ -31,7 +31,7 @@ struct TunerView: View {
         let noteAngles = [-75.0, -45.0, -15.0, 15.0, 45.0, 75.0]
         VStack{
             VStack{
-                Text("Tuner")
+                Text("Tune")
                     .font(.system(size: 30, weight: .bold))
                     .padding(.top, 10)
                     .padding(.bottom, 10)

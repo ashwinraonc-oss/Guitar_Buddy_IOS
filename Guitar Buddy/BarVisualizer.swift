@@ -46,6 +46,7 @@ struct BarVisualizer: View {
                     
                     Rectangle()
                         .fill(.primary.opacity(0.85))
+                        .fill(Color(.white))
                         .frame(width: safeBarWidth, height: barHeight)
                         .cornerRadius(safeBarWidth / 2)
                         .offset(y : yOffset)
