@@ -19,6 +19,12 @@ struct RootViewUpdated: View {
     var body: some View{
         VStack{
             TabView (selection: $selectedTab){
+                MiniRecorderView()
+                    .tabItem{
+                        Image(systemName: "microphone")
+                        Text("Record")
+                    }
+                    .tag(3)
                 ProgressionView(progression: progression)
                     .tabItem{
                         Image(systemName: "lightbulb.max.fill")
@@ -27,7 +33,7 @@ struct RootViewUpdated: View {
                     .tag(1)
                 ContentView(recorder: recorder)
                     .tabItem{
-                        Image(systemName: "microphone.fill")
+                        Image(systemName: "ear.badge.waveform")
                         Text("Detect")
                     }
                     .tag(0)
