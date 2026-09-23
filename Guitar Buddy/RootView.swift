@@ -15,15 +15,16 @@ struct RootView: View {
     @StateObject private var recorder = AudioController()
     @StateObject private var tuner = TunerController()
     @StateObject private var progression = ProgressionController()
-    
+    @StateObject private var player = ChordPlayer()
+
     var body: some View {
         ZStack {
-            TabView(selection: $selectedTab){
+            TabView(selection: $selectedTab) {
                 ContentView(recorder: recorder)
                     .tag(0)
                 ProgressionView(progression: progression)
                     .tag(1)
-                TunerView(tuner: tuner)
+                TunerView(tuner: tuner, player: player)
                     .tag(2)
                 Text("Tab4")
                     .tag(3)
@@ -32,7 +33,7 @@ struct RootView: View {
                 Text("Tab6")
                     .tag(5)
             } .tabViewStyle(.page(indexDisplayMode: .never)).ignoresSafeArea()
-            VStack{
+            VStack {
                 Spacer()
                 ZStack {
                     RoundedRectangle(cornerRadius: 20)
@@ -40,34 +41,34 @@ struct RootView: View {
                         .frame(width: 350, height: 60)
 //                        .offset(x: 0, y: 60)
                     HStack(spacing: 15) {
-                        Button{
+                        Button {
                             selectedTab = 0
-                        }label:{
+                        }label: {
                             Circle().fill(Color.orange).frame(width: 35, height: 35)/*.offset(x: -25, y: 60)*/
                         }.opacity(selectedTab == 0 ? 0.3 : 1.0)
-                        Button{
+                        Button {
                             selectedTab = 1
-                        }label:{
+                        }label: {
                             Circle().fill(Color.red).frame(width: 35, height: 35)/*.offset(x: -15, y: 60)*/
                         }.opacity(selectedTab == 1 ? 0.3 : 1.0)
-                        Button{
+                        Button {
                             selectedTab = 2
-                        }label:{
+                        }label: {
                             Circle().fill(Color.white).frame(width: 35, height: 35)/*.offset(x:  -5, y: 60)*/
                         }.opacity(selectedTab == 2 ? 0.3 : 1.0)
-                        Button{
+                        Button {
                             selectedTab = 3
-                        }label:{
+                        }label: {
                             Circle().fill(Color.green).frame(width: 35, height: 35)/*.offset(x:   5, y: 60)*/
                         }.opacity(selectedTab == 3 ? 0.3 : 1.0)
-                        Button{
+                        Button {
                             selectedTab = 4
-                        }label:{
+                        }label: {
                             Circle().fill(Color.blue).frame(width: 35, height: 35)/*.offset(x: 15, y: 60)*/
                         }.opacity(selectedTab == 4 ? 0.3 : 1.0)
-                        Button{
+                        Button {
                             selectedTab = 5
-                        }label:{
+                        }label: {
                             Circle().fill(Color.purple).frame(width: 35, height: 35)/*.offset(x:  25, y: 60)*/
                         }.opacity(selectedTab == 5 ? 0.3 : 1.0)
                     }

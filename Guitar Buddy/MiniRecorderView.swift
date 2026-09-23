@@ -12,7 +12,7 @@ struct MiniRecorderView: View {
     @StateObject private var rec = MiniRecorder()
     @State private var recordings: [URL] = []
     @StateObject private var player = MiniPlayer()
-    
+
     var body: some View {
         GeometryReader { geo in
             let w = geo.size.width
@@ -20,9 +20,9 @@ struct MiniRecorderView: View {
             let xScale = w / 390
             let yScale = h / 844
 
-            VStack{
+            VStack {
                 Text("Record")
-                    .font(.system(size: 36 * xScale, weight: .bold))
+                    .font(.system(size: 30 * xScale, weight: .bold))
                     .padding(.top, 10 * yScale)
                     .padding(.bottom, 10 * yScale)
                     .foregroundStyle(Color(red: 9/255, green: 21/255, blue: 64/255))
@@ -34,7 +34,7 @@ struct MiniRecorderView: View {
                             .stroke(Color.black, lineWidth: 3)
                     )
 
-                BarVisualizer(values: rec.meterHistory, barCount: 24)
+                BarVisualizer(values: rec.isRecording ? rec.meterHistory : player.meterHistory, barCount: 24)
                     .frame(height: 70 * yScale)
                     .padding(.horizontal)
 
@@ -43,9 +43,9 @@ struct MiniRecorderView: View {
                     .animation(.linear, value: rec.meterLevel)
                     .tint(.green)
 
-                HStack{
+                HStack {
                     Button {
-                        if rec.isRecording{
+                        if rec.isRecording {
                             rec.stop()
                         } else {
                             player.stop()
@@ -76,7 +76,7 @@ struct MiniRecorderView: View {
                     .disabled(rec.isRecording || rec.fileURL == nil)
                 }
 
-                if let url = rec.fileURL{
+                if let url = rec.fileURL {
                     Text("File: \(url.lastPathComponent)")
                         .font(.system(size: 16 * xScale, weight: .bold))
                         .foregroundStyle(Color(red: 9/255, green: 21/255, blue: 64/255))
@@ -96,15 +96,15 @@ struct MiniRecorderView: View {
 
                 ScrollView {
                     VStack(spacing: 10 * yScale) {
-                        ForEach(recordings, id: \.self){ url in
-                            HStack{
-                                Button{
-                                    if player.playingURL == url && player.isPlaying{
+                        ForEach(recordings, id: \.self) { url in
+                            HStack {
+                                Button {
+                                    if player.playingURL == url && player.isPlaying {
                                         player.pause()
                                     } else {
                                         player.play(url)
                                     }
-                                } label:{
+                                } label: {
                                     Image(systemName:
                                             (player.playingURL == url && player.isPlaying) ? "pause.fill" : "play.fill")
                                         .foregroundStyle(.black)
@@ -150,13 +150,13 @@ struct MiniRecorderView: View {
             }
             .padding()
             .background(Color(red: 179/255, green: 235/255, blue: 242/255).ignoresSafeArea())
-            .task{
+            .task {
                 recordings = recordingList()
             }
-            .onChange(of: rec.isRecording){ isRecording in
-                if isRecording{
+            .onChange(of: rec.isRecording) { isRecording in
+                if isRecording {
                     player.stop()
-                }else{
+                } else {
                     recordings = recordingList()
                 }
 
@@ -164,12 +164,12 @@ struct MiniRecorderView: View {
             .frame(width: w, height: h)
         }
     }
-    func recordingList() -> [URL]{
+    func recordingList() -> [URL] {
         let dir = try? FileManager.default
             .url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
             .appendingPathComponent("Recording", isDirectory: true)
         guard let dir, let files = try? FileManager.default.contentsOfDirectory(at: dir, includingPropertiesForKeys: nil) else {return []}
-        return files.filter{$0.pathExtension == "wav"}.sorted{$0.lastPathComponent > $1.lastPathComponent}
+        return files.filter {$0.pathExtension == "wav"}.sorted {$0.lastPathComponent > $1.lastPathComponent}
     }
 }
 

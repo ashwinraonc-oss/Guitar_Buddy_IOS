@@ -9,25 +9,25 @@ import SwiftUI
 import Accelerate
 import Combine
 
-struct Tuning{
+struct Tuning {
     let name: String
     let stringMIDI: [Int]
-    var stringNames: [String]{
-        let notes = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"]
-        return stringMIDI.map{notes[(($0%12) + 12)%12]}
+    var stringNames: [String] {
+        let notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+        return stringMIDI.map {notes[(($0%12) + 12)%12]}
     }
 }
-//Tunings
+// Tunings
 let standardTuning = Tuning(name: "Standard", stringMIDI: [40, 45, 50, 55, 59, 64])       // E A D G B E
-let dropDTuning  = Tuning(name: "Drop D",   stringMIDI: [38, 45, 50, 55, 59, 64])       // D A D G B E
-let dadgadTuning = Tuning(name: "DADGAD",   stringMIDI: [38, 45, 50, 55, 57, 62])       // D A D G A D
-let dadfceTuning = Tuning(name: "DADFCE",   stringMIDI: [38, 45, 50, 53, 60, 64])       // D A D F C E
-let dropHalfStepTuning = Tuning(name: "Eb",   stringMIDI: [39, 44, 49, 54, 58, 63])// Eb Ab Db Gb Bb Eb
+let dropDTuning  = Tuning(name: "Drop D", stringMIDI: [38, 45, 50, 55, 59, 64])       // D A D G B E
+let dadgadTuning = Tuning(name: "DADGAD", stringMIDI: [38, 45, 50, 55, 57, 62])       // D A D G A D
+let dadfceTuning = Tuning(name: "DADFCE", stringMIDI: [38, 45, 50, 53, 60, 64])       // D A D F C E
+let dropHalfStepTuning = Tuning(name: "Eb", stringMIDI: [39, 44, 49, 54, 58, 63])// Eb Ab Db Gb Bb Eb
+let openGTuning = Tuning(name: "Open G", stringMIDI: [38, 43, 50, 55, 59, 62]) // D G D G B D
 
-
-class TunerController: NSObject, ObservableObject{
+class TunerController: NSObject, ObservableObject {
     private var engine = AVAudioEngine()
-    nonisolated (unsafe) private var rollingBuffer: [Float] = []
+    nonisolated(unsafe) private var rollingBuffer: [Float] = []
     @Published var detectedNote: String = "--"
     @Published var tuningDirection: String = "--"
     @Published var inTune: Bool = false
@@ -35,29 +35,29 @@ class TunerController: NSObject, ObservableObject{
     @Published var isRunning = false
     @Published var centsOff = Float(0)
     @Published var selectedTuning: Tuning = standardTuning
-    @Published var closestString: Int? = nil
+    @Published var closestString: Int?
     private var consecutiveCount = 0
     private var pendingNote = "--"
-    
-    func startTuning(){
+
+    func startTuning() {
         let inputNode = engine.inputNode
         let format = inputNode.inputFormat(forBus: 0)
-        inputNode.installTap(onBus:0, bufferSize: 1024, format: format){buffer, _ in
+        inputNode.installTap(onBus: 0, bufferSize: 1024, format: format) {buffer, _ in
             self.processBuffer(buffer)
         }
         do {
             try engine.start()
-            DispatchQueue.main.async{
+            DispatchQueue.main.async {
                 self.isRunning = true
             }
-        } catch let error{
+        } catch let error {
             print(error.localizedDescription)
         }
     }
-    func stopTuning(){
+    func stopTuning() {
         engine.inputNode.removeTap(onBus: 0)
         engine.stop()
-        DispatchQueue.main.async{
+        DispatchQueue.main.async {
             self.isRunning = false
         }
     }
@@ -85,13 +85,13 @@ class TunerController: NSObject, ObservableObject{
 
         let sampleRate = Float(buffer.format.sampleRate)
         let frequency = yin(rollingBuffer, sampleRate: sampleRate)
-        
+
         guard frequency > 0 else { return }
 
         let note = frequencyToNote(frequency)
         let centsOff = frequencyToCents(frequency)
-        let targetFrequencies = selectedTuning.stringMIDI.map{440 * pow(2, (Float($0) - 69) / 12)}
-        let centsDiff = targetFrequencies.map{1200 * log2(frequency / $0)}
+        let targetFrequencies = selectedTuning.stringMIDI.map {440 * pow(2, (Float($0) - 69) / 12)}
+        let centsDiff = targetFrequencies.map {1200 * log2(frequency / $0)}
         let closestIndex = centsDiff.indices.min(by: { abs(centsDiff[$0]) < abs(centsDiff[$1]) })!
         let diffToClosest = centsDiff[closestIndex]
         let direction: String
@@ -178,24 +178,23 @@ class TunerController: NSObject, ObservableObject{
 
         return sampleRate / betterTau
     }
-    
+
     nonisolated private func frequencyToNote(_ frequency: Float) -> String {
         let notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
-        if frequency < 50{
+        if frequency < 50 {
             return "--"
         }
         let MIDI = Int(round(12 * log2(frequency / 440)) + 69)
         let note = notes[((MIDI%12)+12)%12]
-        
+
         return note
     }
-    nonisolated private func frequencyToCents(_ frequency: Float) -> Float{
+    nonisolated private func frequencyToCents(_ frequency: Float) -> Float {
         let exactMIDI = 12 * log2(frequency / 440) + 69
         let nearestMIDI = round(exactMIDI)
         let centsOff = (exactMIDI - nearestMIDI) * 100
-        
+
         return centsOff
     }
-    
-    
+
 }

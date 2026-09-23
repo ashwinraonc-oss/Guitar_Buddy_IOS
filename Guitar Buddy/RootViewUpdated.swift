@@ -15,30 +15,30 @@ struct RootViewUpdated: View {
     @StateObject private var recorder = AudioController()
     @StateObject private var tuner = TunerController()
     @StateObject private var progression = ProgressionController()
-    
-    var body: some View{
-        VStack{
-            TabView (selection: $selectedTab){
+
+    var body: some View {
+        VStack {
+            TabView(selection: $selectedTab) {
                 MiniRecorderView()
-                    .tabItem{
+                    .tabItem {
                         Image(systemName: "microphone")
                         Text("Record")
                     }
                     .tag(3)
                 ProgressionView(progression: progression)
-                    .tabItem{
+                    .tabItem {
                         Image(systemName: "lightbulb.max.fill")
                         Text("Create")
                     }
                     .tag(1)
                 ContentView(recorder: recorder)
-                    .tabItem{
+                    .tabItem {
                         Image(systemName: "ear.badge.waveform")
                         Text("Detect")
                     }
                     .tag(0)
-                TunerView(tuner: tuner)
-                    .tabItem{
+                TunerView(tuner: tuner, player: ChordPlayer())
+                    .tabItem {
                         Image(systemName: "tuningfork")
                         Text("Tune")
                     }

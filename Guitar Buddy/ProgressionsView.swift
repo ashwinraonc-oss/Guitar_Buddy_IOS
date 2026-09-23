@@ -11,24 +11,23 @@ import Combine
 
 struct ProgressionView: View {
     @ObservedObject var progression: ProgressionController
-    @State private var selectedRoot = "A"
+    @State private var selectedRoot = "C"
     @State private var selectedQuality = "major"
     @State private var displayedProgressions: [ProgressionResult] = []
     @StateObject private var chordPlayer = ChordPlayer()
-    
-    
+
 //    let xScale = w / 390
 //    let yScale = h / 844
-    
-    let rootOptions = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#","A", "A#", "B"]
+
+    let rootOptions = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
     let qualityOptions = ["major", "maj7", "minor", "min7"]
-    
+
     let columns = Array(repeating: GridItem(.flexible()), count: 2)
     var body: some View {
-        VStack(spacing:55){
-            VStack{
+        VStack(spacing: 55) {
+            VStack {
                 Text("Create")
-                    .font(.system(size: 25, weight: .bold))
+                    .font(.system(size: 30, weight: .bold))
                     .foregroundStyle(.black)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)
@@ -40,9 +39,9 @@ struct ProgressionView: View {
                     )
                     .padding(.bottom, 5)
                     .padding(.top, 10)
-                HStack{
-                    Picker("Root", selection: $selectedRoot){
-                        ForEach(rootOptions, id: \.self){ root in
+                HStack {
+                    Picker("Root", selection: $selectedRoot) {
+                        ForEach(rootOptions, id: \.self) { root in
                             Text(root)
                                 .font(.system(size: 20, weight: .bold))
                                 .foregroundStyle(Color(red: 255/255, green: 245/255, blue: 220/255))
@@ -58,8 +57,8 @@ struct ProgressionView: View {
                         }
                     }
                     .pickerStyle(.wheel)
-                    Picker("Quality", selection: $selectedQuality){
-                        ForEach(qualityOptions, id: \.self){ quality in
+                    Picker("Quality", selection: $selectedQuality) {
+                        ForEach(qualityOptions, id: \.self) { quality in
                             Text(quality)
                                 .font(.system(size: 20, weight: .bold))
                                 .foregroundStyle(Color(red: 255/255, green: 245/255, blue: 220/255))
@@ -77,15 +76,15 @@ struct ProgressionView: View {
                     .pickerStyle(.wheel)
                 }
                 let maxChordsInProgression = 9
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 0), count: 1), spacing: 10){
-                    Button{
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 0), count: 1), spacing: 10) {
+                    Button {
                         guard progression.progression.count < maxChordsInProgression else { return }
                         let chord = Chord(root: selectedRoot, quality: selectedQuality)
                         progression.selectChord(chord)
     //                    if displayedProgressions.isEmpty {
     //                        displayedProgressions = Array(progression.suggestedProgressions.shuffled().prefix(5))
     //                    }
-                        
+
                     }label: {
                         Text("Add Chord to Progression")
                             .font(.system(size: 18, weight: .bold))
@@ -126,7 +125,7 @@ struct ProgressionView: View {
                         let buttonIconSize = 30 * scale
 
                         LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: itemsPerRow), spacing: 4) {
-                            ForEach(Array(progression.progression.enumerated()), id: \.offset) { index, chord in
+                            ForEach(Array(progression.progression.enumerated()), id: \.offset) { _, chord in
                                 if let voicings = progression.chordVoicings[chord.name],
                                    let first = voicings.first {
                                     VStack(spacing: 4 * scale) {
@@ -171,7 +170,7 @@ struct ProgressionView: View {
     //                    }
     //                }
                     Text("Recommended Progressions:")
-                        .font(.system(size: 18,weight: .bold))
+                        .font(.system(size: 18, weight: .bold))
                         .foregroundStyle(Color.black)
                         .bold()
                         .padding(.horizontal, 20)
@@ -212,7 +211,7 @@ struct ProgressionView: View {
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.bottom, 60)
-                HStack{
+                HStack {
                     Button {
                         progression.reset()
                         progression.suggestedProgressions = []
@@ -231,23 +230,23 @@ struct ProgressionView: View {
                             )
                     }
                     .padding(.bottom, 10)
-                    Button {
-                        progression.savedProgressions.append(progression.progression)
-                        print(progression.savedProgressions)
-                    }label: {
-                        Text("Save Progression")
-                            .font(.system(size: 18, weight: .bold))
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 8)
-                            .background(Color(red: 235/255, green: 51/255, blue: 34/255).opacity(1))
-                            .clipShape(Capsule())
-                            .overlay(
-                                Capsule()
-                                    .stroke(Color.black, lineWidth: 3)
-                            )
-                    }
-                    .padding(.bottom, 10)
+//                    Button {
+//                        progression.savedProgressions.append(progression.progression)
+//                        print(progression.savedProgressions)
+//                    }label: {
+//                        Text("Save Progression")
+//                            .font(.system(size: 18, weight: .bold))
+//                            .foregroundStyle(.white)
+//                            .padding(.horizontal, 12)
+//                            .padding(.vertical, 8)
+//                            .background(Color(red: 235/255, green: 51/255, blue: 34/255).opacity(1))
+//                            .clipShape(Capsule())
+//                            .overlay(
+//                                Capsule()
+//                                    .stroke(Color.black, lineWidth: 3)
+//                            )
+//                    }
+//                    .padding(.bottom, 10)
                 }
 
             }

@@ -28,37 +28,37 @@ class AudioController: NSObject, ObservableObject, AVAudioRecorderDelegate {
     @Published var isRecording = false
     @Published var failedConnection = false
     @Published var midiNotes: [Int] = []
-    
-    override init(){
+
+    override init() {
         super.init()
 //        guard !ProcessInfo.processInfo.environment.keys.contains("XCODE_RUNNING_FOR_PREVIEWS") else { return }
         recordingSession = AVAudioSession.sharedInstance()
-        
-        do{
+
+        do {
             try recordingSession.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker])
             try recordingSession.setActive(true)
-            AVAudioApplication.requestRecordPermission{[weak self] hasPermission in
-                DispatchQueue.main.async{
-                    if hasPermission{
+            AVAudioApplication.requestRecordPermission {[weak self] hasPermission in
+                DispatchQueue.main.async {
+                    if hasPermission {
                         print("ACCEPTED")
                     } else {
                         print("DENIED")
                     }
                 }
-                
+
             }
         } catch {
             print("Failed to set up recording session: \(error)")
         }
     }
-    
-    func getDirectory() -> URL{
+
+    func getDirectory() -> URL {
         let path = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
         let documentDirectory = path[0]
         return documentDirectory
     }
-    
-    func startRecording(){
+
+    func startRecording() {
         failedConnection = false
         detectedChord = nil
         let filename = getDirectory().appendingPathComponent("recording.wav")
@@ -74,10 +74,10 @@ class AudioController: NSObject, ObservableObject, AVAudioRecorderDelegate {
         } catch {
             print("Failed to start recording: \(error)")
         }
-        
+
     }
-    
-    func stopRecording(){
+
+    func stopRecording() {
         audioRecorder?.stop()
         audioRecorder = nil
         uploadRecording()
@@ -87,18 +87,18 @@ class AudioController: NSObject, ObservableObject, AVAudioRecorderDelegate {
            print("File exists: \(FileManager.default.fileExists(atPath: url.path))")
            print("File size: \(try? url.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0) bytes")
     }
-    
-    func uploadRecording(){
+
+    func uploadRecording() {
         let filename = getDirectory().appendingPathComponent("recording.wav")
-        guard let backendURL = URL(string: "https://chord-ghost.onrender.com/detect") else{return}
-        do{
+        guard let backendURL = URL(string: "https://chord-ghost.onrender.com/detect") else {return}
+        do {
             let fileData = try Data(contentsOf: filename)
             let boundary = UUID().uuidString
             var request = URLRequest(url: backendURL)
             request.timeoutInterval = 120
             request.httpMethod = "POST"
             request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
-            
+
             var body = Data()
             body.append("--\(boundary)\r\n".data(using: .utf8)!)
             body.append("Content-Disposition: form-data; name=\"file\"; filename=\"recording.wav\"\r\n".data(using: .utf8)!)
@@ -106,19 +106,19 @@ class AudioController: NSObject, ObservableObject, AVAudioRecorderDelegate {
             body.append(fileData)
             body.append("\r\n--\(boundary)--\r\n".data(using: .utf8)!)
             request.httpBody = body
-            
-            URLSession.shared.dataTask(with: request) {data, response, error in
-                guard let data = data, error == nil else{
-                    DispatchQueue.main.async{
+
+            URLSession.shared.dataTask(with: request) {data, _, error in
+                guard let data = data, error == nil else {
+                    DispatchQueue.main.async {
                         self.failedConnection = true
                         self.isDetecting = false
                     }
                     print("request failed: \(error?.localizedDescription ?? "unknown")")
                     return
                 }
-                if let result = try? JSONDecoder().decode(DetectionResult.self, from: data){
+                if let result = try? JSONDecoder().decode(DetectionResult.self, from: data) {
                     print(result.chord)
-                    DispatchQueue.main.async{
+                    DispatchQueue.main.async {
                         self.detectedChord = result.chord
                         self.voicings = result.voicing
                         self.detectedNotes = result.note_names
@@ -127,22 +127,16 @@ class AudioController: NSObject, ObservableObject, AVAudioRecorderDelegate {
                     }
                 }
             }.resume()
-        
-            
-            
-            
-        }catch{
+
+        } catch {
             print("error uploading audio")
             self.isDetecting = false
         }
     }
-    func reset(){
+    func reset() {
         detectedChord = nil
         voicings = []
         detectedNotes = []
         midiNotes = []
     }
 }
-
-
-

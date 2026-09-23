@@ -15,12 +15,12 @@ struct ShimmerModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .overlay(
-                Group{
+                Group {
                     LinearGradient(
                         stops: [
                             .init(color: .clear, location: phase - 0.3),
                             .init(color: .white.opacity(0.7), location: phase),
-                            .init(color: .clear, location: phase + 0.3),
+                            .init(color: .clear, location: phase + 0.3)
                         ],
                         startPoint: .leading,
                         endPoint: .trailing
@@ -47,7 +47,7 @@ struct ContentView: View {
             let h = geo.size.height
             let xScale = w / 390
             let yScale = h / 844
-            
+
 //            guard let voicingPlayed = recorder.voicings.first else {
 //                print("No Chord Detected")
 //            }
@@ -56,7 +56,7 @@ struct ContentView: View {
                 // Background
                 Color(red: 210/255, green: 125/255, blue: 45/255)
                     .ignoresSafeArea()
-                
+
                 // Main content
                 VStack {
                     Text("Chord Detector")
@@ -91,13 +91,12 @@ struct ContentView: View {
                             Rectangle().fill(Color.black).frame(width: 130 * xScale, height: 4).offset(x: 0, y: 178 * yScale)
                             Rectangle().fill(Color.black).frame(width: 130 * xScale, height: 4).offset(x: 0, y: 128 * yScale)
                         }
-                    
 
                     if let chord = recorder.detectedChord {
                         VStack {
-                            HStack{
+                            HStack {
                                 Text("Chord Detected:").font(.system(size: 25))
-                                
+
                                 Text(chord)
                                     .foregroundStyle(Color(red: 9/255, green: 21/255, blue: 64/255))
                                     .padding(.horizontal, 16)
@@ -149,7 +148,7 @@ struct ContentView: View {
                         .offset(x: 0, y: 595 * yScale)
                         .modifier(ShimmerModifier())
                     }
-                    if recorder.detectedChord == nil && recorder.isDetecting == false{
+                    if recorder.detectedChord == nil && recorder.isDetecting == false {
                         Text("Detect")
                             .font(.system(size: 30, weight: .bold))
                             .padding(.top, 10)
@@ -193,7 +192,6 @@ struct ContentView: View {
                             .offset(x: 0, y: 570 * yScale)
                             .padding(.top, 10)
                     }
-                    
 
                     Spacer()
 
@@ -208,7 +206,7 @@ struct ContentView: View {
                             Circle()
                                 .fill(Color.black)
                                 .frame(width: 70 * xScale, height: 70 * xScale)
-                                
+
                             Circle()
                                 .stroke(Color.black, lineWidth: 10.5)
                                 .frame(width: 73 * xScale, height: 73 * xScale)
@@ -262,25 +260,25 @@ struct ContentView: View {
                     Circle().fill(Color(red: 237/255, green: 219/255, blue: 171/255)).frame(width: 15 * xScale, height: 18 * xScale)
                         .offset(x: -11 * xScale, y: 200 * yScale)
                     Circle().fill(Color(red: 237/255, green: 219/255, blue: 171/255)).frame(width: 15 * xScale, height: 18 * xScale)
-                        .offset(x:  11 * xScale, y: 200 * yScale)
+                        .offset(x: 11 * xScale, y: 200 * yScale)
                     Circle().fill(Color(red: 237/255, green: 219/255, blue: 171/255)).frame(width: 15 * xScale, height: 18 * xScale)
-                        .offset(x:  35 * xScale, y: 200 * yScale)
+                        .offset(x: 35 * xScale, y: 200 * yScale)
                     Circle().fill(Color(red: 237/255, green: 219/255, blue: 171/255)).frame(width: 15 * xScale, height: 18 * xScale)
-                        .offset(x:  58 * xScale, y: 200 * yScale)
+                        .offset(x: 58 * xScale, y: 200 * yScale)
                 }
-                //strings
+                // strings
                 ZStack {
                     Rectangle().fill(Color.white).frame(width: 4, height: 783 * yScale).offset(x: -58 * xScale, y: -199 * yScale)
                     Rectangle().fill(Color.white).frame(width: 4, height: 770 * yScale).offset(x: -35 * xScale, y: -192 * yScale)
                     Rectangle().fill(Color.white).frame(width: 4, height: 765 * yScale).offset(x: -11 * xScale, y: -190 * yScale)
-                    Rectangle().fill(Color.white).frame(width: 4, height: 765 * yScale).offset(x:  11 * xScale, y: -190 * yScale)
-                    Rectangle().fill(Color.white).frame(width: 4, height: 770 * yScale).offset(x:  35 * xScale, y: -192 * yScale)
-                    Rectangle().fill(Color.white).frame(width: 4, height: 783 * yScale).offset(x:  58 * xScale, y: -199 * yScale)
+                    Rectangle().fill(Color.white).frame(width: 4, height: 765 * yScale).offset(x: 11 * xScale, y: -190 * yScale)
+                    Rectangle().fill(Color.white).frame(width: 4, height: 770 * yScale).offset(x: 35 * xScale, y: -192 * yScale)
+                    Rectangle().fill(Color.white).frame(width: 4, height: 783 * yScale).offset(x: 58 * xScale, y: -199 * yScale)
 
                 }
                 .allowsHitTesting(false)
-                
-                //guitar nuts
+
+                // guitar nuts
 
                 // Border overlay
                 Rectangle()
@@ -293,7 +291,7 @@ struct ContentView: View {
                         ($0.filter { $0 != -1 && $0 != 0 }.min() ?? 0) <
                         ($1.filter { $0 != -1 && $0 != 0 }.min() ?? 0)
                     }
-                    HStack(alignment: .top){
+                    HStack(alignment: .top) {
                         Button {
                             voicingIndex = max(voicingIndex - 1, 0)
                         } label: {
@@ -324,10 +322,10 @@ struct ContentView: View {
                             .onChange(of: recorder.voicings) { _ in
                                 voicingIndex = 0
                             }
-                            .onChange(of: recorder.voicings){newVoicings in
+                            .onChange(of: recorder.voicings) {newVoicings in
                                 guard let voicings = newVoicings, !voicings.isEmpty else {return}
                                 chordPlayer.playChord(fretArray: voicings[0])
-                                
+
                             }
                         Button {
                             voicingIndex = min(voicingIndex + 1, sorted.count - 1)

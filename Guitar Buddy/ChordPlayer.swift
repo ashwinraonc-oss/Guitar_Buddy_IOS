@@ -10,26 +10,26 @@ import AudioToolbox
 import Combine
 import SwiftUI
 
-class ChordPlayer: ObservableObject{
+class ChordPlayer: ObservableObject {
     private let engine = AVAudioEngine()
     private let sampler = AVAudioUnitSampler()
-    
-    init(){
+
+    init() {
         engine.attach(sampler)
         engine.connect(sampler, to: engine.mainMixerNode, format: nil)
         sampler.volume = 1.0
         try? engine.start()
         loadSoundFont()
     }
-    
-    private func loadSoundFont(){
+
+    private func loadSoundFont() {
         guard let url = Bundle.main.url(forResource: "GeneralUser-GS", withExtension: "sf2") else {
             print("Soundfont not found")
             return
         }
         try? sampler.loadSoundBankInstrument(
             at: url,
-            program: 25,
+            program: 24,
             bankMSB: UInt8(kAUSampler_DefaultMelodicBankMSB),
             bankLSB: UInt8(kAUSampler_DefaultBankLSB)
         )
@@ -43,7 +43,7 @@ class ChordPlayer: ObservableObject{
             let note = openStrings[i] + UInt8(fret)
             playedNotes.append(note)
             DispatchQueue.main.asyncAfter(deadline: .now() + Double(i) * 0.1) {
-                self.sampler.startNote(note, withVelocity: 120, onChannel: 0)
+                self.sampler.startNote(note, withVelocity: 60, onChannel: 0)
             }
         }
 
@@ -53,22 +53,21 @@ class ChordPlayer: ObservableObject{
     }
     func playMIDI(midiArray: [Int]) {
         let midiArraySorted = midiArray.sorted()
-        print("playMIDI called at \(Date())")
-        print(midiArraySorted.count)
-        var playNotes: [UInt8] = []
-        for (i, fret) in midiArraySorted.enumerated(){
+        let uniformEndingTime = DispatchTime.now() + 3.0
+        
+        for (i, fret) in midiArraySorted.enumerated() {
             let note = UInt8(fret)
-            playNotes.append(note)
-            DispatchQueue.main.asyncAfter(deadline: .now() + Double(i) * 0.1) {
-                print("closure firing at \(Date())")
-                self.sampler.startNote(note, withVelocity: 120, onChannel: 0)
-                print("startNote returned at \(Date())")
+            let startTime = DispatchTime.now() + (Double(i) * 0.1)
+            
+            // Safe asynchronous start
+            DispatchQueue.main.asyncAfter(deadline: startTime) { [weak self] in
+                self?.sampler.startNote(note, withVelocity: 80, onChannel: 0)
+            }
+            
+            // Safe asynchronous stop at the exact same deadline
+            DispatchQueue.main.asyncAfter(deadline: uniformEndingTime) { [weak self] in
+                self?.sampler.stopNote(note, onChannel: 0)
             }
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-            playNotes.forEach { self.sampler.stopNote($0, onChannel: 0) }
-        }
-    }
+    } // <-- Fixed the missing closing brace
 }
-
-

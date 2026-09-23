@@ -14,8 +14,8 @@ struct BarVisualizer: View {
     let values: [Float]
     let barCount: Int
     var body: some View {
-        
-        GeometryReader{geo in
+
+        GeometryReader {geo in
             let rawWidth = geo.size.width
             let rawHeight = geo.size.height
             let width = rawWidth.isFinite ? max(0, rawWidth) : 0
@@ -26,7 +26,7 @@ struct BarVisualizer: View {
             let availableWidth = max(0, width - totalSpacing)
             let barWdith = availableWidth / CGFloat(safeBarCount)
             let chunkSize = max(1, values.count / safeBarCount)
-            
+
             let barValues: [Float] = (0..<safeBarCount).map { i in
             let start = i * chunkSize
                 let end = min(start + chunkSize, values.count)
@@ -34,30 +34,26 @@ struct BarVisualizer: View {
                 let slice = values[start..<end]
                 return slice.reduce(0, +) / Float(slice.count)
         }
-            
-            HStack(alignment: .center, spacing: barSpacing){
+
+            HStack(alignment: .center, spacing: barSpacing) {
                 ForEach(0..<safeBarCount, id: \.self) { i in
                 let base = CGFloat(barValues[i])
                     let v = base.isFinite ? base : 0
-                    let capped = max(0.07, min(v,1))
+                    let capped = max(0.07, min(v, 1))
                     let barHeight = max(0, min(height, capped * height))
                     let safeBarWidth = max(0, barWdith)
-                    let yOffset = (height - barHeight) / 2
-                    
+
                     Rectangle()
                         .fill(.primary.opacity(0.85))
                         .fill(Color(.white))
                         .frame(width: safeBarWidth, height: barHeight)
                         .cornerRadius(safeBarWidth / 2)
-                        .offset(y : yOffset)
-                        
-                    
+
                 }
             }
-            
+            .frame(width: width, height: height)
+
         }
-        
-        
+
     }
 }
-

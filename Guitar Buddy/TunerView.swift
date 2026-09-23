@@ -9,8 +9,23 @@ import AVFoundation
 import SwiftUI
 import Combine
 
+struct NeedleShape: Shape {
+    func path(in rect: CGRect) -> Path {
+        let tipLength = rect.height * 0.15   // only the top 15% tapers to a point
+
+        var path = Path()
+        path.move(to: CGPoint(x: rect.midX, y: rect.minY))                 // sharp tip
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.minY + tipLength))  // where the straight shaft starts, right side
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))              // straight down the right side
+        path.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))              // straight across the bottom
+        path.addLine(to: CGPoint(x: rect.minX, y: rect.minY + tipLength))  // straight up the left side
+        path.closeSubpath()
+        return path
+    }
+}
 struct TunerView: View {
     @ObservedObject var tuner: TunerController
+    @ObservedObject var player: ChordPlayer
     var needleAngle: Double {
         guard let idx = tuner.closestString else { return 0.0 }
         let base = -75.0 + 30.0 * Double(idx)
@@ -18,8 +33,8 @@ struct TunerView: View {
         let offset = clampedCents * (15.0 / 150.0)                        // map ±150 cents → ±15°
         return base + offset
     }
-    
-    var body: some View{
+
+    var body: some View {
         let scale = 1.6
         let arcDiameter = 250.0 * scale
         let labelRadius = 110 * scale
@@ -29,8 +44,8 @@ struct TunerView: View {
 
         let guitarNotes = tuner.selectedTuning.stringNames
         let noteAngles = [-75.0, -45.0, -15.0, 15.0, 45.0, 75.0]
-        VStack{
-            VStack{
+        VStack {
+            VStack {
                 Text("Tune")
                     .font(.system(size: 30, weight: .bold))
                     .padding(.top, 10)
@@ -70,7 +85,13 @@ struct TunerView: View {
                         .frame(width: arcDiameter, height: arcDiameter)
                         .offset(y: centerOffset)
 
-                    Capsule()
+//                    Capsule()
+//                        .fill(Color.yellow)
+//                        .frame(width: 4, height: needleLength)
+//                        .rotationEffect(.degrees(needleAngle), anchor: .bottom)
+//                        .offset(y: centerOffset - needleLength / 2)
+//                        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: needleAngle)
+                    NeedleShape()
                         .fill(Color.yellow)
                         .frame(width: 4, height: needleLength)
                         .rotationEffect(.degrees(needleAngle), anchor: .bottom)
@@ -78,18 +99,19 @@ struct TunerView: View {
                         .animation(.spring(response: 0.3, dampingFraction: 0.7), value: needleAngle)
                 }
                 .frame(width: arcDiameter, height: arcDiameter / 2 + 5)
-                HStack{
+                HStack {
                     Text("\(tuner.detectedNote)")
                 }
                 .font(.system(size: 60, weight: .bold))
-                .offset(y:-10)
+                .offset(y: -10)
                 Text(tuner.tuningDirection)
                     .font(.system(size: 20, weight: .bold))
                     .foregroundStyle(tuner.inTune ? Color(red: 88/255, green: 217/255, blue: 99/255) : .white)
-                
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: -13), count: 4), spacing: 10){
+
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: -13), count: 4), spacing: 10) {
                     Button {
                         tuner.selectedTuning = standardTuning
+                        player.playMIDI(midiArray: standardTuning.stringMIDI)
                     }label: {
                         Text("Standard")
                             .font(.system(size: 15, weight: .bold))
@@ -106,6 +128,7 @@ struct TunerView: View {
                     .opacity(tuner.selectedTuning.name == "Standard" ? 0.5 : 1)
                     Button {
                         tuner.selectedTuning = dropDTuning
+                        player.playMIDI(midiArray: dropDTuning.stringMIDI)
                     }label: {
                         Text("Drop D")
                             .font(.system(size: 15, weight: .bold))
@@ -122,6 +145,7 @@ struct TunerView: View {
                     .opacity(tuner.selectedTuning.name == "Drop D" ? 0.5 : 1)
                     Button {
                         tuner.selectedTuning = dadgadTuning
+                        player.playMIDI(midiArray: dadgadTuning.stringMIDI)
                     }label: {
                         Text("DADGAD")
                             .font(.system(size: 15, weight: .bold))
@@ -138,6 +162,7 @@ struct TunerView: View {
                     .opacity(tuner.selectedTuning.name == "DADGAD" ? 0.5 : 1)
                     Button {
                         tuner.selectedTuning = dadfceTuning
+                        player.playMIDI(midiArray: dadfceTuning.stringMIDI)
                     }label: {
                         Text("DADFCE")
                             .font(.system(size: 15, weight: .bold))
@@ -153,7 +178,7 @@ struct TunerView: View {
                     }
                     .opacity(tuner.selectedTuning.name == "DADFCE" ? 0.5 : 1)
                     Button {
-                        tuner.selectedTuning = dropHalfStepTuning
+                       
                     }label: {
                         Text("Half Step Down")
                             .font(.system(size: 12, weight: .bold))
@@ -167,11 +192,45 @@ struct TunerView: View {
                                     .stroke(Color.black, lineWidth: 3)
                             )
                     }
+                    .opacity(0)
+                    Button {
+                        tuner.selectedTuning = dropHalfStepTuning
+                        player.playMIDI(midiArray: dropHalfStepTuning.stringMIDI)
+                    }label: {
+                        Text("E Flat")
+                            .font(.system(size: 17, weight: .bold))
+                            .foregroundStyle(.black)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
+                            .background(Color(.yellow))
+                            .clipShape(Capsule())
+                            .overlay(
+                                Capsule()
+                                    .stroke(Color.black, lineWidth: 3)
+                            )
+                    }
                     .opacity(tuner.selectedTuning.name == "Eb" ? 0.5 : 1)
+                    Button {
+                        tuner.selectedTuning = openGTuning
+                        player.playMIDI(midiArray: openGTuning.stringMIDI)
+                    }label: {
+                        Text("Open G")
+                            .font(.system(size: 15, weight: .bold))
+                            .foregroundStyle(.black)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
+                            .background(Color(.yellow))
+                            .clipShape(Capsule())
+                            .overlay(
+                                Capsule()
+                                    .stroke(Color.black, lineWidth: 3)
+                            )
+                    }
+                    .opacity(tuner.selectedTuning.name == "Open G" ? 0.5 : 1)
                 }
                 .padding(.horizontal, 10)
                 .padding(.top, 50)
-                .onAppear{
+                .onAppear {
                     guard !ProcessInfo.processInfo.environment.keys.contains("XCODE_RUNNING_FOR_PREVIEWS") else { return }
                     tuner.startTuning()
                 }
@@ -183,10 +242,9 @@ struct TunerView: View {
         .background(Color(red: 191/255, green: 64/255, blue: 191/255).ignoresSafeArea())
 
     }
-    
 
 }
 
 #Preview {
-    TunerView(tuner: TunerController())
+    TunerView(tuner: TunerController(), player: ChordPlayer())
 }
