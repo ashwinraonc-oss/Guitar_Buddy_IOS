@@ -111,7 +111,7 @@ struct TunerView: View {
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: -13), count: 4), spacing: 10) {
                     Button {
                         tuner.selectedTuning = standardTuning
-                        player.playMIDI(midiArray: standardTuning.stringMIDI)
+                        player.playMIDIUnsorted(midiArray: standardTuning.stringMIDI)
                     }label: {
                         Text("Standard")
                             .font(.system(size: 15, weight: .bold))
@@ -128,7 +128,7 @@ struct TunerView: View {
                     .opacity(tuner.selectedTuning.name == "Standard" ? 0.5 : 1)
                     Button {
                         tuner.selectedTuning = dropDTuning
-                        player.playMIDI(midiArray: dropDTuning.stringMIDI)
+                        player.playMIDIUnsorted(midiArray: dropDTuning.stringMIDI)
                     }label: {
                         Text("Drop D")
                             .font(.system(size: 15, weight: .bold))
@@ -145,7 +145,7 @@ struct TunerView: View {
                     .opacity(tuner.selectedTuning.name == "Drop D" ? 0.5 : 1)
                     Button {
                         tuner.selectedTuning = dadgadTuning
-                        player.playMIDI(midiArray: dadgadTuning.stringMIDI)
+                        player.playMIDIUnsorted(midiArray: dadgadTuning.stringMIDI)
                     }label: {
                         Text("DADGAD")
                             .font(.system(size: 15, weight: .bold))
@@ -162,7 +162,7 @@ struct TunerView: View {
                     .opacity(tuner.selectedTuning.name == "DADGAD" ? 0.5 : 1)
                     Button {
                         tuner.selectedTuning = dadfceTuning
-                        player.playMIDI(midiArray: dadfceTuning.stringMIDI)
+                        player.playMIDIUnsorted(midiArray: dadfceTuning.stringMIDI)
                     }label: {
                         Text("DADFCE")
                             .font(.system(size: 15, weight: .bold))
@@ -195,7 +195,7 @@ struct TunerView: View {
                     .opacity(0)
                     Button {
                         tuner.selectedTuning = dropHalfStepTuning
-                        player.playMIDI(midiArray: dropHalfStepTuning.stringMIDI)
+                        player.playMIDIUnsorted(midiArray: dropHalfStepTuning.stringMIDI)
                     }label: {
                         Text("E Flat")
                             .font(.system(size: 17, weight: .bold))
@@ -212,7 +212,7 @@ struct TunerView: View {
                     .opacity(tuner.selectedTuning.name == "Eb" ? 0.5 : 1)
                     Button {
                         tuner.selectedTuning = openGTuning
-                        player.playMIDI(midiArray: openGTuning.stringMIDI)
+                        player.playMIDIUnsorted(midiArray: openGTuning.stringMIDI)
                     }label: {
                         Text("Open G")
                             .font(.system(size: 15, weight: .bold))

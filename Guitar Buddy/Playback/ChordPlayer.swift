@@ -43,31 +43,44 @@ class ChordPlayer: ObservableObject {
             let note = openStrings[i] + UInt8(fret)
             playedNotes.append(note)
             DispatchQueue.main.asyncAfter(deadline: .now() + Double(i) * 0.1) {
-                self.sampler.startNote(note, withVelocity: 60, onChannel: 0)
+                self.sampler.startNote(note, withVelocity: 80, onChannel: 0)
             }
         }
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
             playedNotes.forEach { self.sampler.stopNote($0, onChannel: 0) }
         }
     }
     func playMIDI(midiArray: [Int]) {
         let midiArraySorted = midiArray.sorted()
-        let uniformEndingTime = DispatchTime.now() + 3.0
+        var playedNotes: [UInt8] = []
         
         for (i, fret) in midiArraySorted.enumerated() {
             let note = UInt8(fret)
-            let startTime = DispatchTime.now() + (Double(i) * 0.1)
-            
-            // Safe asynchronous start
-            DispatchQueue.main.asyncAfter(deadline: startTime) { [weak self] in
-                self?.sampler.startNote(note, withVelocity: 80, onChannel: 0)
-            }
-            
-            // Safe asynchronous stop at the exact same deadline
-            DispatchQueue.main.asyncAfter(deadline: uniformEndingTime) { [weak self] in
-                self?.sampler.stopNote(note, onChannel: 0)
+            playedNotes.append(note)
+            DispatchQueue.main.asyncAfter(deadline: .now() + Double(i) * 0.1) {
+                self.sampler.startNote(note, withVelocity: 80, onChannel: 0)
             }
         }
-    } // <-- Fixed the missing closing brace
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            playedNotes.forEach { self.sampler.stopNote($0, onChannel: 0) }
+        }
+    }
+    func playMIDIUnsorted(midiArray: [Int]) {
+        var playedNotes: [UInt8] = []
+        
+        for (i, fret) in midiArray.enumerated() {
+            let note = UInt8(fret)
+            playedNotes.append(note)
+            DispatchQueue.main.asyncAfter(deadline: .now() + Double(i) * 0.13) {
+                self.sampler.startNote(note, withVelocity: 80, onChannel: 0)
+            }
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            playedNotes.forEach { self.sampler.stopNote($0, onChannel: 0) }
+        }
+    }
 }
+
