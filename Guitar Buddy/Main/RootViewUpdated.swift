@@ -13,8 +13,15 @@ struct RootViewUpdated: View {
     @State var selectedTab = 0
     @State var dimmed = false
     @StateObject private var recorder = AudioController()
+    @StateObject private var keys: PianoController
     @StateObject private var tuner = TunerController()
     @StateObject private var progression = ProgressionController()
+    
+    init(){
+        let recorder = AudioController()
+        self._recorder = StateObject(wrappedValue: recorder)
+        self._keys = StateObject(wrappedValue: PianoController(audioController: recorder))
+    }
 
     var body: some View {
         VStack {
@@ -31,7 +38,7 @@ struct RootViewUpdated: View {
                         Text("Create")
                     }
                     .tag(1)
-                ContentView(recorder: recorder)
+                ContentView(keys: keys, recorder: recorder)
                     .tabItem {
                         Image(systemName: "ear.badge.waveform")
                         Text("Detect")
