@@ -21,6 +21,7 @@
 import SwiftUI
 import AVFoundation
 import Combine
+import Lottie
 
 struct PianoView: View {
     @ObservedObject var recorder: AudioController
@@ -56,7 +57,7 @@ struct PianoView: View {
                             let baseX = CGFloat(key.position * 40) + centerOffset
                             let whiteKeyWidth: CGFloat = 40
                             let whiteKeyHeight: CGFloat = 200
-                            let rect = CGRect(x: baseX - whiteKeyWidth / 2, y: 0, width: whiteKeyWidth, height: whiteKeyHeight)
+                            let rect = CGRect(x: baseX - whiteKeyWidth / 2, y: 1.5, width: whiteKeyWidth, height: whiteKeyHeight)
                             let path = Path(roundedRect: rect, cornerRadius: 8)
                             
                             let fillColor = key.active
@@ -72,7 +73,7 @@ struct PianoView: View {
                             let baseX = CGFloat(key.position * 40) + centerOffset
                             let blackKeyWidth: CGFloat = 20
                             let blackKeyHeight: CGFloat = 100
-                            let rect = CGRect(x: baseX + 20 - blackKeyWidth / 2, y: 0, width: blackKeyWidth, height: blackKeyHeight)
+                            let rect = CGRect(x: baseX + 20 - blackKeyWidth / 2, y: 1.5, width: blackKeyWidth, height: blackKeyHeight)
                             let path = Path(roundedRect: rect, cornerRadius: 6)
                             
                             let fillColor = key.active
@@ -106,7 +107,7 @@ struct PianoView: View {
                                     print("No Chord Detected")
                                     return
                                 }
-                                chordPlayer.playChord(fretArray: firstVoicing)
+                                chordPlayer.playPianoChord(midiArray: recorder.chord_notes_names_midi)
                             } label: {
                                 Image(systemName: "play.circle.fill")
                                     .font(.system(size: 24))
@@ -128,13 +129,57 @@ struct PianoView: View {
                                     )
                                 Button {
                                     print(recorder.midiNotes.count)
-                                    chordPlayer.playMIDI(midiArray: recorder.midiNotes)
+                                    chordPlayer.playPianoChord(midiArray: recorder.midiNotes)
                                 } label: {
                                     Image(systemName: "play.circle.fill")
                                         .font(.system(size: 24))
                                         .foregroundStyle(.black)
                                 }
                             }
+                        }
+                        if recorder.detectedChord == nil && recorder.isDetecting == false {
+                            Text("Detect")
+                                .font(.system(size: 30, weight: .bold))
+                                .padding(.top, 10)
+                                .padding(.bottom, 10)
+                                .foregroundStyle(Color(red: 9/255, green: 21/255, blue: 64/255))
+                                .padding(.horizontal, 20)
+                                .padding(.vertical, 0)
+                                .background(Color(red: 88/255, green: 217/255, blue: 99/255))
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(Color.black, lineWidth: 3)
+                                )
+                                .offset(x: 0, y: 600 * yScale)
+                        }
+                        
+                        if recorder.failedConnection == true {
+                            Text("Connection Failed")
+                                .font(.system(size: 30 * xScale))
+                                .foregroundStyle(.red)
+                                .bold()
+                                .offset(y: 550 * yScale)
+                        }
+                        
+                        if recorder.isDetecting == true {
+                            LottieView(animation: .named("loading"))
+                                .playing()
+                                .looping()
+                                .resizable()
+                                .configure { view in
+                                    view.setValueProvider(
+                                        ColorValueProvider(LottieColor(r: 88/255, g: 217/255, b: 99/255, a: 1)),
+                                        keypath: AnimationKeypath(keypath: "**.Color")
+                                    )
+                                    view.setValueProvider(
+                                        ColorValueProvider(LottieColor(r: 0, g: 0, b: 0, a: 1)),
+                                        keypath: AnimationKeypath(keypath: "ellipse.**.Color")
+                                    )
+                                }
+                                .frame(width: 130 * xScale, height: 130 * xScale)
+                                .offset(x: 0, y: 570 * yScale)
+                                .padding(.top, 10)
                         }
                     }
                     .font(.system(size: 28 * xScale))

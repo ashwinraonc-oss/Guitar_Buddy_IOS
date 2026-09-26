@@ -16,6 +16,7 @@ struct RootViewUpdated: View {
     @StateObject private var keys: PianoController
     @StateObject private var tuner = TunerController()
     @StateObject private var progression = ProgressionController()
+    @StateObject private var tunerPlayer = ChordPlayer()
     
     init(){
         let recorder = AudioController()
@@ -44,7 +45,7 @@ struct RootViewUpdated: View {
                         Text("Detect")
                     }
                     .tag(0)
-                TunerView(tuner: tuner, player: ChordPlayer())
+                TunerView(tuner: tuner, player: tunerPlayer)
                     .tabItem {
                         Image(systemName: "tuningfork")
                         Text("Tune")
