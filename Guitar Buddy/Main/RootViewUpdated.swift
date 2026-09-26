@@ -27,24 +27,24 @@ struct RootViewUpdated: View {
     var body: some View {
         VStack {
             TabView(selection: $selectedTab) {
-                MiniRecorderView()
-                    .tabItem {
-                        Image(systemName: "microphone")
-                        Text("Record")
-                    }
-                    .tag(3)
-                ProgressionView(progression: progression)
-                    .tabItem {
-                        Image(systemName: "lightbulb.max.fill")
-                        Text("Create")
-                    }
-                    .tag(1)
                 ContentView(keys: keys, recorder: recorder)
                     .tabItem {
                         Image(systemName: "ear.badge.waveform")
                         Text("Detect")
                     }
                     .tag(0)
+                ProgressionView(progression: progression)
+                    .tabItem {
+                        Image(systemName: "lightbulb.max.fill")
+                        Text("Create")
+                    }
+                    .tag(1)
+                MiniRecorderView()
+                    .tabItem {
+                        Image(systemName: "microphone")
+                        Text("Record")
+                    }
+                    .tag(3)
                 TunerView(tuner: tuner, player: tunerPlayer)
                     .tabItem {
                         Image(systemName: "tuningfork")

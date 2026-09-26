@@ -34,6 +34,7 @@ class AudioController: NSObject, ObservableObject, AVAudioRecorderDelegate {
     @Published var chord_notes: [Int] = []
     @Published var chord_notes_names: [String] = []
     @Published var chord_notes_names_midi: [Int] = []
+    @Published var root: Int?
 
     override init() {
         super.init()
@@ -133,6 +134,7 @@ class AudioController: NSObject, ObservableObject, AVAudioRecorderDelegate {
                         self.chord_notes = result.chord_notes
                         self.chord_notes_names = result.chord_notes_names
                         self.chord_notes_names_midi = result.chord_notes_names_midi
+                        self.root = result.root
                     }
                 }
             }.resume()
@@ -150,5 +152,7 @@ class AudioController: NSObject, ObservableObject, AVAudioRecorderDelegate {
         chord_notes = []
         chord_notes_names = []
         chord_notes_names_midi = []
+        root = nil
+        
     }
 }

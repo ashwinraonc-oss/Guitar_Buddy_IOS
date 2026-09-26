@@ -60,9 +60,12 @@ struct PianoView: View {
                             let rect = CGRect(x: baseX - whiteKeyWidth / 2, y: 1.5, width: whiteKeyWidth, height: whiteKeyHeight)
                             let path = Path(roundedRect: rect, cornerRadius: 8)
                             
-                            let fillColor = key.active
+                            var fillColor = key.active
                             ? Color(red: 88/255, green: 217/255, blue: 99/255)   // same green ContentView uses for "active"/detected states
                             : Color(red: 237/255, green: 219/255, blue: 171/255) // same cream ContentView uses for the guitar's tuning pegs
+                            if key.MIDI % 12 == recorder.root{
+                                fillColor = Color(red: 238/255, green: 75/255, blue: 43/255)
+                            }
                             
                             context.fill(path, with: .color(fillColor))
                             context.stroke(path, with: .color(.black), lineWidth: 3)
@@ -76,16 +79,20 @@ struct PianoView: View {
                             let rect = CGRect(x: baseX + 20 - blackKeyWidth / 2, y: 1.5, width: blackKeyWidth, height: blackKeyHeight)
                             let path = Path(roundedRect: rect, cornerRadius: 6)
                             
-                            let fillColor = key.active
+                            var fillColor = key.active
                             ? Color(red: 88/255, green: 217/255, blue: 99/255)
                             : Color(red: 14/255, green: 17/255, blue: 17/255)
+                            if key.MIDI % 12 == recorder.root{
+                                fillColor = Color(red: 238/255, green: 75/255, blue: 43/255)
+                            }
                             
                             context.fill(path, with: .color(fillColor))
                             context.stroke(path, with: .color(.black), lineWidth: 3)
                         }
                     }
+                    .scaleEffect(1.3)
                 }
-                .offset(y: 200)
+                .offset(y: 300)
                 
                 if let chord = recorder.detectedChord {
                     VStack {
@@ -184,7 +191,7 @@ struct PianoView: View {
                     }
                     .font(.system(size: 28 * xScale))
                     .bold()
-                    .offset(x: 0, y: -250 * yScale)
+                    .offset(x: 0, y: -200 * yScale)
                     .modifier(ShimmerModifier())
                 }
             }
