@@ -158,6 +158,8 @@ struct ProgressionView: View {
                     .frame(height: 255)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                .padding(.horizontal, 15)
+                .padding(.vertical, -20)
                 VStack(alignment: .center) {
     //                Text("Suggested Chords:")
     //                    .foregroundStyle(Color.black)
@@ -175,7 +177,7 @@ struct ProgressionView: View {
                         .bold()
                         .padding(.horizontal, 20)
                         .padding(.vertical, 10)
-                        .background(Color(red: 255/255, green: 199/255, blue: 55/255))
+                        .background(Color(red: 88/255, green: 217/255, blue: 99/255).opacity(1))
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                         .overlay(
                             RoundedRectangle(cornerRadius: 12)

@@ -40,7 +40,7 @@ struct PianoView: View {
                 Color(red: 210/255, green: 125/255, blue: 45/255)
                     .ignoresSafeArea()
                 let canvasWidth: Int = keySpacing * 48
-                VStack{
+                VStack(spacing: 20){
                 HStack{
                     Canvas{context, size in
                         let availHeight = size.height
@@ -125,6 +125,9 @@ struct PianoView: View {
                             HStack {
                                 Text("Notes Played:").font(.system(size: 25))
                                 Text("\(notes.joined(separator: ", "))")
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.5)
+                                    .frame(maxWidth: 160 * xScale)
                                     .foregroundStyle(Color(red: 9/255, green: 21/255, blue: 64/255))
                                     .padding(.horizontal, 16)
                                     .padding(.vertical, 8)

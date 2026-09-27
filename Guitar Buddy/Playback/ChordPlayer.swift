@@ -50,7 +50,7 @@ class ChordPlayer: ObservableObject {
         }
         try? samplerPiano.loadSoundBankInstrument(
             at: url,
-            program: 2,
+            program: 7,
             bankMSB: UInt8(kAUSampler_DefaultMelodicBankMSB),
             bankLSB: UInt8(kAUSampler_DefaultBankLSB)
         )
@@ -80,7 +80,7 @@ class ChordPlayer: ObservableObject {
             }
         }
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
             playedNotes.forEach { self.sampler.stopNote($0, onChannel: 0) }
         }
     }
@@ -108,7 +108,7 @@ class ChordPlayer: ObservableObject {
             }
         }
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
             playedNotes.forEach { self.sampler.stopNote($0, onChannel: 0) }
         }
     }
@@ -135,7 +135,7 @@ class ChordPlayer: ObservableObject {
             }
         }
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
             playedNotes.forEach { self.sampler.stopNote($0, onChannel: 0) }
         }
     }
@@ -163,7 +163,7 @@ class ChordPlayer: ObservableObject {
             }
         }
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
             playedNotes.forEach { self.samplerPiano.stopNote($0, onChannel: 0) }
         }
     }

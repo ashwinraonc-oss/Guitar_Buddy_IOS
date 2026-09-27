@@ -103,6 +103,7 @@ struct TunerView: View {
                     Text("\(tuner.detectedNote)")
                 }
                 .font(.system(size: 60, weight: .bold))
+                .foregroundStyle(Color(.white))
                 .offset(y: -10)
                 Text(tuner.tuningDirection)
                     .font(.system(size: 20, weight: .bold))
