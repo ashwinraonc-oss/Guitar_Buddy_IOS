@@ -35,6 +35,7 @@ class AudioController: NSObject, ObservableObject, AVAudioRecorderDelegate {
     @Published var chord_notes_names: [String] = []
     @Published var chord_notes_names_midi: [Int] = []
     @Published var root: Int?
+    @Published var micPermissionDenied: Bool = false
 
     override init() {
         super.init()
@@ -48,8 +49,10 @@ class AudioController: NSObject, ObservableObject, AVAudioRecorderDelegate {
                 DispatchQueue.main.async {
                     if hasPermission {
                         print("ACCEPTED")
+                        self?.micPermissionDenied = false
                     } else {
                         print("DENIED")
+                        self?.micPermissionDenied = true
                     }
                 }
 
@@ -126,6 +129,7 @@ class AudioController: NSObject, ObservableObject, AVAudioRecorderDelegate {
                 if let result = try? JSONDecoder().decode(DetectionResult.self, from: data) {
                     print(result.chord)
                     DispatchQueue.main.async {
+                        print(result.chord)
                         self.detectedChord = result.chord
                         self.voicings = result.voicing
                         self.detectedNotes = result.note_names
@@ -136,6 +140,10 @@ class AudioController: NSObject, ObservableObject, AVAudioRecorderDelegate {
                         self.chord_notes_names_midi = result.chord_notes_names_midi
                         self.root = result.root
                     }
+                } else {
+                    print("result from backend did not return properly")
+                    self.isDetecting = false
+                    self.failedConnection = true
                 }
             }.resume()
 

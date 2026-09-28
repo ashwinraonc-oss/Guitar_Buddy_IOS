@@ -13,12 +13,13 @@ struct FretBoardDiagramView: View {
     var stringSpacing: CGFloat = 40
     var fretSpacing: CGFloat = 74  // default for standalone use
     var dotColor: Color = .yellow
+    var opacity: Double = 1
 
     private var filteredNumbers: [Int] { fretArray.filter {$0 != -1 && $0 != 0}}
     private var minFret: Int {filteredNumbers.min() ?? 0}
     private var maxFret: Int {filteredNumbers.max() ?? 0}
     private var usesAbsolutePos: Bool {maxFret <= 3}
-
+    
     var body: some View {
         let labelWidth: CGFloat = stringSpacing * 2
         let canvasWidth: CGFloat = stringSpacing * 6
@@ -65,14 +66,14 @@ struct FretBoardDiagramView: View {
                         var path = Path()
                         path.move(to: CGPoint(x: x, y: topPad))
                         path.addLine(to: CGPoint(x: x, y: topPad + 4 * rowHeight))
-                        context.stroke(path, with: .color(Color(red: 255/255, green: 250/255, blue: 220/255)), lineWidth: lineWidth)
+                        context.stroke(path, with: .color(Color(red: 255/255, green: 250/255, blue: 220/255).opacity(opacity)), lineWidth: lineWidth)
                     }
                     for i in 0..<5 { // fret lines
                         let y = topPad + CGFloat(i) * rowHeight
                         var path = Path()
                         path.move(to: CGPoint(x: startX, y: y))
                         path.addLine(to: CGPoint(x: endX, y: y))
-                        context.stroke(path, with: .color(Color(red: 255/255, green: 250/255, blue: 220/255)), lineWidth: lineWidth)
+                        context.stroke(path, with: .color(Color(red: 255/255, green: 250/255, blue: 220/255).opacity(opacity)), lineWidth: lineWidth)
                     }
 
                     for (j, fret) in fretArray.enumerated() {

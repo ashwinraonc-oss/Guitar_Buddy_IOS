@@ -98,9 +98,14 @@ struct PianoView: View {
                     VStack {
                         HStack {
                             Text("Chord Detected:").font(.system(size: 25))
-                            
-                            Text(chord)
+                                .foregroundStyle(Color(.white))
+                            let chordCap = chord.strictCapitalized
+                            Text(chordCap)
+                                .font(.system(size: 40))
                                 .foregroundStyle(Color(red: 9/255, green: 21/255, blue: 64/255))
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.5)
+                                .frame(maxWidth: 100 * xScale)
                                 .padding(.horizontal, 16)
                                 .padding(.vertical, 8)
                                 .background(Color(red: 88/255, green: 217/255, blue: 99/255))
@@ -114,20 +119,22 @@ struct PianoView: View {
                                     print("No Chord Detected")
                                     return
                                 }
-                                chordPlayer.playPianoChord(midiArray: recorder.chord_notes_names_midi)
+                                chordPlayer.playPianoVoicing(fretArray: firstVoicing)
                             } label: {
                                 Image(systemName: "play.circle.fill")
-                                    .font(.system(size: 24))
+                                    .font(.system(size: 26))
                                     .foregroundStyle(.black)
                             }
                         }
                         if let notes = recorder.detectedNotes {
                             HStack {
                                 Text("Notes Played:").font(.system(size: 25))
+                                    .foregroundStyle(Color(.white))
                                 Text("\(notes.joined(separator: ", "))")
+                                    .font(.system(size: 40))
                                     .lineLimit(1)
                                     .minimumScaleFactor(0.5)
-                                    .frame(maxWidth: 160 * xScale)
+                                    .frame(maxWidth: 100 * xScale)
                                     .foregroundStyle(Color(red: 9/255, green: 21/255, blue: 64/255))
                                     .padding(.horizontal, 16)
                                     .padding(.vertical, 8)
@@ -142,12 +149,12 @@ struct PianoView: View {
                                     chordPlayer.playPianoChord(midiArray: recorder.midiNotes)
                                 } label: {
                                     Image(systemName: "play.circle.fill")
-                                        .font(.system(size: 24))
+                                        .font(.system(size: 26))
                                         .foregroundStyle(.black)
                                 }
                             }
                         }
-                        if recorder.detectedChord == nil && recorder.isDetecting == false {
+                        if recorder.detectedChord == nil && recorder.isDetecting == false && recorder.failedConnection == false {
                             Text("Detect")
                                 .font(.system(size: 30, weight: .bold))
                                 .padding(.top, 10)

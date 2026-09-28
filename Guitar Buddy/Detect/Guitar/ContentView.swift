@@ -9,6 +9,13 @@ import SwiftUI
 import AVFoundation
 import Lottie
 
+extension String {
+    var strictCapitalized: String {
+        guard !self.isEmpty else { return self }
+        return self.prefix(1).uppercased() + self.dropFirst().lowercased()
+    }
+}
+
 struct ShimmerModifier: ViewModifier {
     @State private var phase: CGFloat = -1
 
@@ -36,6 +43,26 @@ struct ShimmerModifier: ViewModifier {
     }
 }
 
+struct VibratingString: Shape {
+    var amplitude: CGFloat
+
+    var animatableData: CGFloat {
+        get { amplitude }
+        set { amplitude = newValue }
+    }
+
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        let top = CGPoint(x: rect.midX, y: rect.minY)
+        let bottom = CGPoint(x: rect.midX, y: rect.maxY)
+        let mid = CGPoint(x: rect.midX + amplitude, y: rect.midY)
+        path.move(to: top)
+        path.addQuadCurve(to: bottom, control: mid)
+        return path
+    }
+    
+}
+
 struct ContentView: View {
     enum ActiveView {
         case guitar
@@ -47,6 +74,8 @@ struct ContentView: View {
     @State private var voicingIndex: Int = 0
     @StateObject private var chordPlayer = ChordPlayer()
     @State private var ViewMode: ActiveView = .guitar
+    @State private var stringVibration: CGFloat = 0
+
     
 
     var body: some View {
@@ -102,9 +131,14 @@ struct ContentView: View {
                                     VStack {
                                         HStack {
                                             Text("Chord Detected:").font(.system(size: 25))
-                                            
-                                            Text(chord)
+                                                .foregroundStyle(Color(.white))
+                                            let chordCap = chord.strictCapitalized
+                                            Text(chordCap)
                                                 .foregroundStyle(Color(red: 9/255, green: 21/255, blue: 64/255))
+                                                .font(.system(size: 40))
+                                                .lineLimit(1)
+                                                .minimumScaleFactor(0.5)
+                                                .frame(maxWidth: 100 * xScale)
                                                 .padding(.horizontal, 16)
                                                 .padding(.vertical, 8)
                                                 .background(Color(red: 88/255, green: 217/255, blue: 99/255))
@@ -119,19 +153,26 @@ struct ContentView: View {
                                                     return
                                                 }
                                                 chordPlayer.playChord(fretArray: firstVoicing)
+                                                stringVibration = 8
+                                                withAnimation(.spring(response: 0.15, dampingFraction: 0.15)) {
+                                                    stringVibration = 0
+                                                }
                                             } label: {
                                                 Image(systemName: "play.circle.fill")
-                                                    .font(.system(size: 24))
+                                                    .font(.system(size: 26))
                                                     .foregroundStyle(.black)
                                             }
+                                        
                                         }
                                         if let notes = recorder.detectedNotes {
                                             HStack {
                                                 Text("Notes Played:").font(.system(size: 25))
+                                                    .foregroundStyle(Color(.white))
                                                 Text("\(notes.joined(separator: ", "))")
+                                                    .font(.system(size: 40))
                                                     .lineLimit(1)
                                                     .minimumScaleFactor(0.5)
-                                                    .frame(maxWidth: 160 * xScale)
+                                                    .frame(maxWidth: 100 * xScale)
                                                     .foregroundStyle(Color(red: 9/255, green: 21/255, blue: 64/255))
                                                     .padding(.horizontal, 16)
                                                     .padding(.vertical, 8)
@@ -144,12 +185,18 @@ struct ContentView: View {
                                                 Button {
                                                     print(recorder.midiNotes.count)
                                                     chordPlayer.playMIDI(midiArray: recorder.midiNotes)
+                                                    stringVibration = 8
+                                                    withAnimation(.spring(response: 0.15, dampingFraction: 0.15)) {
+                                                        stringVibration = 0
+                                                    }
                                                 } label: {
                                                     Image(systemName: "play.circle.fill")
-                                                        .font(.system(size: 24))
+                                                        .font(.system(size: 26
+                                                                ))
                                                         .foregroundStyle(.black)
                                                 }
                                             }
+                                            
                                         }
                                     }
                                     .font(.system(size: 28 * xScale))
@@ -157,7 +204,7 @@ struct ContentView: View {
                                     .offset(x: 0, y: 595 * yScale)
                                     .modifier(ShimmerModifier())
                                 }
-                                if recorder.detectedChord == nil && recorder.isDetecting == false {
+                                if recorder.detectedChord == nil && recorder.isDetecting == false && recorder.failedConnection == false{
                                     HStack{
                                         Text("Detect")
                                             .font(.system(size: 30, weight: .bold))
@@ -177,11 +224,12 @@ struct ContentView: View {
                                 }
                                 
                                 if recorder.failedConnection == true {
-                                    Text("Connection Failed")
+                                    
+                                    Text("Detection Failed")
                                         .font(.system(size: 30 * xScale))
                                         .foregroundStyle(.red)
                                         .bold()
-                                        .offset(y: 550 * yScale)
+                                        .offset(y: 600 * yScale)
                                 }
                                 
                                 if recorder.isDetecting == true {
@@ -202,6 +250,14 @@ struct ContentView: View {
                                         .frame(width: 130 * xScale, height: 130 * xScale)
                                         .offset(x: 0, y: 570 * yScale)
                                         .padding(.top, 10)
+                                }
+                                
+                                if recorder.micPermissionDenied == true{
+                                    Text("Mic permission denied")
+                                        .font(.system(size: 30 * xScale))
+                                        .foregroundStyle(.red)
+                                        .bold()
+                                        .offset(y: 600 * yScale)
                                 }
                                 
                                 Spacer()
@@ -251,40 +307,41 @@ struct ContentView: View {
                             }
                             
                             // String lines overlay
-                            ZStack {
-                                RoundedRectangle(cornerRadius: 20).fill(Color.black)
-                                    .frame(width: 166 * xScale, height: 36 * yScale)
-                                    .offset(x: 0, y: 200 * yScale)
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 20)
-                                            .fill(Color.black.opacity(0.8))
-                                            .frame(width: 165 * xScale, height: 30 * yScale)
-                                            .offset(x: 0 * xScale, y: 200 * yScale)
-                                    )
-                                RoundedRectangle(cornerRadius: 20).fill(Color(red: 92/255, green: 67/255, blue: 33/255))
-                                    .frame(width: 160 * xScale, height: 28 * yScale)
-                                    .offset(x: 0, y: 200 * yScale)
-                                Circle().fill(Color(red: 237/255, green: 219/255, blue: 171/255)).frame(width: 15 * xScale, height: 18 * xScale)
-                                    .offset(x: -58 * xScale, y: 200 * yScale)
-                                Circle().fill(Color(red: 237/255, green: 219/255, blue: 171/255)).frame(width: 15 * xScale, height: 18 * xScale)
-                                    .offset(x: -35 * xScale, y: 200 * yScale)
-                                Circle().fill(Color(red: 237/255, green: 219/255, blue: 171/255)).frame(width: 15 * xScale, height: 18 * xScale)
-                                    .offset(x: -11 * xScale, y: 200 * yScale)
-                                Circle().fill(Color(red: 237/255, green: 219/255, blue: 171/255)).frame(width: 15 * xScale, height: 18 * xScale)
-                                    .offset(x: 11 * xScale, y: 200 * yScale)
-                                Circle().fill(Color(red: 237/255, green: 219/255, blue: 171/255)).frame(width: 15 * xScale, height: 18 * xScale)
-                                    .offset(x: 35 * xScale, y: 200 * yScale)
-                                Circle().fill(Color(red: 237/255, green: 219/255, blue: 171/255)).frame(width: 15 * xScale, height: 18 * xScale)
-                                    .offset(x: 58 * xScale, y: 200 * yScale)
-                            }
+                                ZStack {
+                                    RoundedRectangle(cornerRadius: 20).fill(Color.black)
+                                        .frame(width: 166 * xScale, height: 36 * yScale)
+                                        .offset(x: 0, y: 200 * yScale)
+                                        .background(
+                                            RoundedRectangle(cornerRadius: 20)
+                                                .fill(Color.black.opacity(0.8))
+                                                .frame(width: 165 * xScale, height: 30 * yScale)
+                                                .offset(x: 0 * xScale, y: 200 * yScale)
+                                        )
+                                    RoundedRectangle(cornerRadius: 20).fill(Color(red: 92/255, green: 67/255, blue: 33/255))
+                                        .frame(width: 160 * xScale, height: 28 * yScale)
+                                        .offset(x: 0, y: 200 * yScale)
+                                    Circle().fill(Color(red: 237/255, green: 219/255, blue: 171/255)).frame(width: 15 * xScale, height: 18 * xScale)
+                                        .offset(x: -58 * xScale, y: 200 * yScale)
+                                    Circle().fill(Color(red: 237/255, green: 219/255, blue: 171/255)).frame(width: 15 * xScale, height: 18 * xScale)
+                                        .offset(x: -35 * xScale, y: 200 * yScale)
+                                    Circle().fill(Color(red: 237/255, green: 219/255, blue: 171/255)).frame(width: 15 * xScale, height: 18 * xScale)
+                                        .offset(x: -11 * xScale, y: 200 * yScale)
+                                    Circle().fill(Color(red: 237/255, green: 219/255, blue: 171/255)).frame(width: 15 * xScale, height: 18 * xScale)
+                                        .offset(x: 11 * xScale, y: 200 * yScale)
+                                    Circle().fill(Color(red: 237/255, green: 219/255, blue: 171/255)).frame(width: 15 * xScale, height: 18 * xScale)
+                                        .offset(x: 35 * xScale, y: 200 * yScale)
+                                    Circle().fill(Color(red: 237/255, green: 219/255, blue: 171/255)).frame(width: 15 * xScale, height: 18 * xScale)
+                                        .offset(x: 58 * xScale, y: 200 * yScale)
+                                    
+                                }
                             // strings
                             ZStack {
-                                Rectangle().fill(Color.white).frame(width: 4, height: 783 * yScale).offset(x: -58 * xScale, y: -199 * yScale)
-                                Rectangle().fill(Color.white).frame(width: 4, height: 770 * yScale).offset(x: -35 * xScale, y: -192 * yScale)
-                                Rectangle().fill(Color.white).frame(width: 4, height: 765 * yScale).offset(x: -11 * xScale, y: -190 * yScale)
-                                Rectangle().fill(Color.white).frame(width: 4, height: 765 * yScale).offset(x: 11 * xScale, y: -190 * yScale)
-                                Rectangle().fill(Color.white).frame(width: 4, height: 770 * yScale).offset(x: 35 * xScale, y: -192 * yScale)
-                                Rectangle().fill(Color.white).frame(width: 4, height: 783 * yScale).offset(x: 58 * xScale, y: -199 * yScale)
+                                VibratingString(amplitude: stringVibration).stroke(Color.white, lineWidth: 4).frame(width: 4, height: 783 * yScale).offset(x: -58 * xScale, y: -199 * yScale)
+                                VibratingString(amplitude: stringVibration).stroke(Color.white, lineWidth: 4).frame(width: 4, height: 770 * yScale).offset(x: -35 * xScale, y: -192 * yScale)
+                                VibratingString(amplitude: stringVibration).stroke(Color.white, lineWidth: 4).frame(width: 4, height: 765 * yScale).offset(x: -11 * xScale, y: -190 * yScale)
+                                VibratingString(amplitude: stringVibration).stroke(Color.white, lineWidth: 4).frame(width: 4, height: 765 * yScale).offset(x: 11 * xScale, y: -190 * yScale)
+                                VibratingString(amplitude: stringVibration).stroke(Color.white, lineWidth: 4).frame(width: 4, height: 770 * yScale).offset(x: 35 * xScale, y: -192 * yScale)
+                                VibratingString(amplitude: stringVibration).stroke(Color.white, lineWidth: 4).frame(width: 4, height: 783 * yScale).offset(x: 58 * xScale, y: -199 * yScale)
                                 
                             }
                             .allowsHitTesting(false)
@@ -319,7 +376,7 @@ struct ContentView: View {
                                             )
                                     } .opacity(voicingIndex == 0 ? 0.5 : 1)
                                         .padding(.top, 150 * yScale)
-                                    FretBoardDiagramView(fretArray: sorted[min(voicingIndex, sorted.count - 1)], stringSpacing: 23 * xScale, fretSpacing: 50 * yScale)
+                                    FretBoardDiagramView(fretArray: sorted[min(voicingIndex, sorted.count - 1)], stringSpacing: 23 * xScale, fretSpacing: 50 * yScale, opacity: 0)
                                         .gesture(
                                             DragGesture()
                                                 .onEnded { value in
@@ -352,7 +409,6 @@ struct ContentView: View {
                                                 Capsule()
                                                     .stroke(Color.black, lineWidth: 3)
                                             )
-                                        
                                     }
                                     .padding(.top, 150 * yScale)
                                     .opacity(voicingIndex == voicings.count - 1 ? 0.5 : 1)
@@ -376,15 +432,15 @@ struct ContentView: View {
                     }
                 } label:{
                     Image(systemName: "pianokeys")
-                        .font(.system(size: 50, weight: .bold))
+                        .font(.system(size: 40, weight: .bold))
                         .foregroundStyle(.black)
                         .background(alignment: .center) {
                             Rectangle()
                                 .fill(Color.white)
-                                .frame(width: 50, height: 40)
+                                .frame(width: 40, height: 30)
                         }
                 }
-                .offset(x: 150, y: 0)
+                .offset(x: 135, y: 0)
                 .opacity(ViewMode == .piano ? 0.5 : 1)
             }
         .overlay(alignment: .top){
@@ -396,17 +452,29 @@ struct ContentView: View {
                 }
             } label:{
                 Image(systemName: "questionmark.square")
-                    .font(.system(size: 50, weight: .bold))
+                    .font(.system(size: 40, weight: .bold))
                     .foregroundStyle(.black)
                     .background(alignment: .center) {
                         Rectangle()
                             .fill(Color.white)
-                            .frame(width: 40, height: 40)
+                            .frame(width: 30, height: 30)
                     }
             }
-            .offset(x: -150, y: 0)
+            .offset(x: 185, y: 0)
             .opacity(ViewMode == .instructions ? 0.5 : 1)
-        }
+            }
+//        .overlay{
+//            Button {
+//                recorder.reset()
+//            } label:{
+//                Image(systemName: "x.square")
+//                    .font(.system(size: 30, weight: .bold))
+//                    .foregroundStyle(.black)
+//            }
+//            .offset(x: -140 * xScale, y: -393 * yScale)
+//            .opacity(recorder.detectedChord != nil ? 1 : 0.0)
+//        }
+            
         }
     }
 }

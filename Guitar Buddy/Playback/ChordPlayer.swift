@@ -16,7 +16,7 @@ class ChordPlayer: ObservableObject {
     private let samplerPiano = AVAudioUnitSampler()
     private var lastPlayTime: Date = .distantPast
     //covers the longest scheduled note duration below (2s), so a new call is never issued while a previous voice might still be rendering/releasing
-    private let minPlayInterval: TimeInterval = 2.0
+    private let minPlayInterval: TimeInterval = 1.0
 
     init() {
         engine.attach(sampler)//guitar sampler
@@ -82,6 +82,35 @@ class ChordPlayer: ObservableObject {
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
             playedNotes.forEach { self.sampler.stopNote($0, onChannel: 0) }
+        }
+    }
+    //play piano midi notes given guitar voicing
+    func playPianoVoicing(fretArray: [Int]) {
+        let now = Date()
+        guard now.timeIntervalSince(lastPlayTime) > minPlayInterval else {
+            print("playChord REJECTED - \(now.timeIntervalSince(lastPlayTime))s since last play")
+            return
+        }
+        print("playChord ACCEPTED")
+        lastPlayTime = now
+
+        if !engine.isRunning {
+            try? engine.start()
+        }
+        let openStrings: [UInt8] = [40, 45, 50, 55, 59, 64]
+        var playedNotes: [UInt8] = []
+
+        for (i, fret) in fretArray.enumerated() {
+            guard fret != -1, i < openStrings.count else { continue }
+            let note = openStrings[i] + UInt8(fret)
+            playedNotes.append(note)
+            DispatchQueue.main.asyncAfter(deadline: .now() + Double(i) * 0.1) {
+                self.samplerPiano.startNote(note, withVelocity: 80, onChannel: 0)
+            }
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+            playedNotes.forEach { self.samplerPiano.stopNote($0, onChannel: 0) }
         }
     }
     //play guitar midi notes given array of midi notes that are sorted
@@ -167,5 +196,7 @@ class ChordPlayer: ObservableObject {
             playedNotes.forEach { self.samplerPiano.stopNote($0, onChannel: 0) }
         }
     }
+    
+    
 
 }
