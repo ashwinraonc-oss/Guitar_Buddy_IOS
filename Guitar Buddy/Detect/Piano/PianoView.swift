@@ -5,19 +5,6 @@
 //  Created by Ashwin Rao on 9/24/26.
 //
 
-//struct Key {
-//    let position: Int
-//    var active: Bool = false
-//    let note: String
-//    let MIDI: Int
-//    var type: String {
-//        switch MIDI%12 {
-//        case let value where MIDI_Sharps.contains(MIDI % 12):  return "Black"
-//        default:  return "White"
-//        }
-//    }
-//}
-
 import SwiftUI
 import AVFoundation
 import Combine
@@ -28,6 +15,8 @@ struct PianoView: View {
     @ObservedObject var keys: PianoController
     @ObservedObject var chordPlayer: ChordPlayer
     var keySpacing: Int = 20
+    
+    @State private var isShrunk = false
     
     var body: some View {
         GeometryReader { geo in
@@ -44,7 +33,6 @@ struct PianoView: View {
                 HStack{
                     Canvas{context, size in
                         let availHeight = size.height
-                        
                         let xs = keys.keyArray.map{key -> CGFloat in
                             let baseX = CGFloat(key.position * 40)
                             return key.type == "Black" ? baseX + 20 : baseX
@@ -53,6 +41,7 @@ struct PianoView: View {
                         let totalWidth = maxX - minX
                         let centerOffset = (size.width - totalWidth) / 2 - minX
                         //white keys
+                        
                         for key in keys.keyArray where key.type != "Black" {
                             let baseX = CGFloat(key.position * 40) + centerOffset
                             let whiteKeyWidth: CGFloat = 40
@@ -67,8 +56,14 @@ struct PianoView: View {
                                 fillColor = Color(red: 238/255, green: 75/255, blue: 43/255)
                             }
                             
+                            
                             context.fill(path, with: .color(fillColor))
                             context.stroke(path, with: .color(.black), lineWidth: 3)
+                            if key.active{
+                                context.draw(
+                                    Text(key.note)
+                                        .font(.system(size: 25, weight: .bold)), at: CGPoint(x: CGFloat(key.position * 40) + centerOffset, y: whiteKeyHeight/1.5))
+                            }
                         }
                         
                         //black keys
@@ -88,6 +83,10 @@ struct PianoView: View {
                             
                             context.fill(path, with: .color(fillColor))
                             context.stroke(path, with: .color(.black), lineWidth: 3)
+                            if key.active{
+                                context.draw(Text(key.note)
+                                    .font(.system(size: 11, weight: .bold)).foregroundStyle(Color(.black)), at: CGPoint(x: baseX + 20, y: blackKeyHeight/1.8))
+                            }
                         }
                     }
                     .scaleEffect(1.3)
@@ -104,7 +103,7 @@ struct PianoView: View {
                                 .font(.system(size: 40))
                                 .foregroundStyle(Color(red: 9/255, green: 21/255, blue: 64/255))
                                 .lineLimit(1)
-                                .minimumScaleFactor(0.5)
+                                .minimumScaleFactor(0.2)
                                 .frame(maxWidth: 100 * xScale)
                                 .padding(.horizontal, 16)
                                 .padding(.vertical, 8)
@@ -120,6 +119,7 @@ struct PianoView: View {
                                     return
                                 }
                                 chordPlayer.playPianoVoicing(fretArray: firstVoicing)
+                                
                             } label: {
                                 Image(systemName: "play.circle.fill")
                                     .font(.system(size: 26))
@@ -133,7 +133,7 @@ struct PianoView: View {
                                 Text("\(notes.joined(separator: ", "))")
                                     .font(.system(size: 40))
                                     .lineLimit(1)
-                                    .minimumScaleFactor(0.5)
+                                    .minimumScaleFactor(0.2)
                                     .frame(maxWidth: 100 * xScale)
                                     .foregroundStyle(Color(red: 9/255, green: 21/255, blue: 64/255))
                                     .padding(.horizontal, 16)

@@ -28,6 +28,8 @@ let openGTuning = Tuning(name: "Open G", stringMIDI: [38, 43, 50, 55, 59, 62]) /
 class TunerController: NSObject, ObservableObject {
     private var engine = AVAudioEngine()
     nonisolated(unsafe) private var rollingBuffer: [Float] = []
+    @Published var chromaticCentsOff: Float = 0
+    @Published var chromaticDirection: String = "--"
     @Published var detectedNote: String = "--"
     @Published var tuningDirection: String = "--"
     @Published var inTune: Bool = false
@@ -67,12 +69,15 @@ class TunerController: NSObject, ObservableObject {
         let samples = Array(UnsafeBufferPointer(start: channelData[0], count: frameLength))
 
         let rms = sqrt(samples.map { $0 * $0 }.reduce(0, +) / Float(frameLength))
-        guard rms > 0.003 else {
+        guard rms > 0.0015 else {
             DispatchQueue.main.async {
                 self.detectedNote = "--"
                 self.centsOff = 0
+                self.chromaticCentsOff = 0
+                self.chromaticDirection = "--"
                 self.tuningDirection = "--"
                 self.closestString = nil
+                
             }
             return
         }
@@ -109,12 +114,22 @@ class TunerController: NSObject, ObservableObject {
                 self.pendingNote = note
                 self.consecutiveCount = 1
             }
-            if self.consecutiveCount >= 2 {
+            if self.consecutiveCount >= 4 {
                 if self.detectedNote != note {
                     self.centsOff = 0
                 }
                 self.detectedNote = note
                 self.detectedFrequency = frequency
+            }
+            if abs(centsOff) < 5 {
+                self.chromaticDirection = "In Tune!"
+                self.chromaticCentsOff = centsOff
+            } else if centsOff > 0 {
+                self.chromaticDirection = "Tune Down"
+                self.chromaticCentsOff = centsOff
+            } else {
+                self.chromaticDirection = "Tune Up"
+                self.chromaticCentsOff = centsOff
             }
             self.closestString = closestIndex
             self.tuningDirection = direction
