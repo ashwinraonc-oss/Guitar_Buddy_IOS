@@ -31,7 +31,7 @@ struct ProgressionView: View {
                     .foregroundStyle(.black)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)
-                    .background(Color(red: 88/255, green: 217/255, blue: 99/255).opacity(1))
+                    .background(Color(red: 179/255, green: 235/255, blue: 242/255).opacity(1))
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                     .overlay(
                         RoundedRectangle(cornerRadius: 12)
@@ -47,7 +47,7 @@ struct ProgressionView: View {
                                 .foregroundStyle(Color(red: 255/255, green: 245/255, blue: 220/255))
                                 .padding(.horizontal, 10)
                                 .padding(.vertical, 1)
-                                .background(Color(red: 144/255, green: 213/255, blue: 255/255))
+                                .background(Color(red: 250/255, green: 80/255, blue: 83/255))
                                 .clipShape(RoundedRectangle(cornerRadius: 10))
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 10)
@@ -91,7 +91,7 @@ struct ProgressionView: View {
                             .foregroundStyle(.black)
                             .padding(.horizontal, 12)
                             .padding(.vertical, 8)
-                            .background(Color(red: 88/255, green: 217/255, blue: 99/255).opacity(1))
+                            .background(Color(red: 179/255, green: 235/255, blue: 242/255).opacity(1))
                             .clipShape(Capsule())
                             .overlay(
                                 Capsule()
@@ -136,7 +136,8 @@ struct ProgressionView: View {
                                         FretBoardDiagramView(fretArray: first, stringSpacing: stringSpacing, fretSpacing: fretSpacing, dotColor: .red)
                                             .fixedSize()
                                             .padding(-4)
-                                            .background(Color(red: 255/255, green: 199/255, blue: 55/255))
+                                            .background(Color(red: 255/255, green: 191/255, blue: 0/255))
+//                                            .background(Color(red: 255/255, green: 199/255, blue: 55/255))
                                             .clipShape(RoundedRectangle(cornerRadius: 12))
                                             .overlay(
                                                 RoundedRectangle(cornerRadius: 12)
@@ -177,7 +178,7 @@ struct ProgressionView: View {
                         .bold()
                         .padding(.horizontal, 20)
                         .padding(.vertical, 10)
-                        .background(Color(red: 88/255, green: 217/255, blue: 99/255).opacity(1))
+                        .background(Color(red: 179/255, green: 235/255, blue: 242/255).opacity(1))
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                         .overlay(
                             RoundedRectangle(cornerRadius: 12)
@@ -253,7 +254,7 @@ struct ProgressionView: View {
 
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-        }.background(Color(red: 255/255, green: 245/255, blue: 220/255).ignoresSafeArea())
+        }.background(Color(red: 242/255, green: 240/255, blue: 239/255).ignoresSafeArea())
     }
 
 }
