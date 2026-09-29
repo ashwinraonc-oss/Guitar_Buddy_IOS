@@ -242,22 +242,22 @@ struct TunerView: View {
             tuner.startTuning()
         }
         .onDisappear { tuner.stopTuning() }
-        .overlay(alignment: .bottom) {
+        .overlay(alignment: .top) {
             Button {
                 acousticSet.toggle()
             } label: {
-                Text(acousticSet ? "Switch to single note \n(Works better for Electric Guitars)" : "Switch to multi-note")
-                    .font(.system(size: 15, weight: .bold))
+                Image(systemName: acousticSet ? "music.note" : "music.quarternote.3")
+                    .font(.system(size: 20, weight: .bold))
                     .foregroundStyle(.black)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)
-                    .background(Color(red: 88/255, green: 217/255, blue: 99/255))
+                    .background(Color(.yellow))
                     .clipShape(Capsule())
                     .overlay(
                         Capsule()
                             .stroke(Color.black, lineWidth: 3)
                     )
-            }.offset(x: 0, y: -40)
+            }.offset(x: 150, y: 6)
         }
     }
 }
