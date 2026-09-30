@@ -24,7 +24,7 @@ struct BarVisualizer: View {
             let barSpacing: CGFloat = 1
             let totalSpacing = CGFloat(safeBarCount - 1) * barSpacing
             let availableWidth = max(0, width - totalSpacing)
-            let barWdith = availableWidth / CGFloat(safeBarCount)
+            let barWidth = availableWidth / CGFloat(safeBarCount)
             let chunkSize = max(1, values.count / safeBarCount)
 
             let barValues: [Float] = (0..<safeBarCount).map { i in
@@ -41,7 +41,7 @@ struct BarVisualizer: View {
                     let v = base.isFinite ? base : 0
                     let capped = max(0.07, min(v, 1))
                     let barHeight = max(0, min(height, capped * height))
-                    let safeBarWidth = max(0, barWdith)
+                    let safeBarWidth = max(0, barWidth)
 
                     Rectangle()
                         .fill(.primary.opacity(0.85))

@@ -14,5 +14,7 @@ Guitar Buddy is an iOS app for guitarists and songwriters to aid in music produc
 
 **Screenshots of App:**
 
-<img src="Guitar%20Buddy/App%20Screenshots/IMG_7526.jpeg" width="200"><img src="Guitar%20Buddy/App%20Screenshots/IMG_7527.jpeg" width="200"> <img src="Guitar%20Buddy/App%20Screenshots/IMG_7520.jpeg" width="200"><img src="Guitar%20Buddy/App%20Screenshots/IMG_7521.jpeg" width="200"> <img src="Guitar%20Buddy/App%20Screenshots/IMG_7522.jpeg" width="200">
+<img src="Guitar%20Buddy/App%20Screenshots/Detect.jpeg" width="200"><img src="Guitar%20Buddy/App%20Screenshots/Tuner.jpeg" width="200">
+ <img src="Guitar%20Buddy/App%20Screenshots/Record.jpeg" width="200"><img src="Guitar%20Buddy/App%20Screenshots/Create.jpeg" width="200"><img src="Guitar%20Buddy/App%20Screenshots/Tuner2.jpeg" width="200">
+<img src="Guitar%20Buddy/App%20Screenshots/Detect2.jpeg" width="200">
 

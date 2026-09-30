@@ -33,18 +33,18 @@ struct RootViewUpdated: View {
                         Text("Detect")
                     }
                     .tag(0)
-                ProgressionView(progression: progression)
-                    .tabItem {
-                        Image(systemName: "lightbulb.max.fill")
-                        Text("Create")
-                    }
-                    .tag(1)
                 MiniRecorderView()
                     .tabItem {
                         Image(systemName: "microphone")
                         Text("Record")
                     }
                     .tag(3)
+                ProgressionView(progression: progression)
+                    .tabItem {
+                        Image(systemName: "lightbulb.max.fill")
+                        Text("Create")
+                    }
+                    .tag(1)
                 TunerView(tuner: tuner, player: tunerPlayer)
                     .tabItem {
                         Image(systemName: "tuningfork")
