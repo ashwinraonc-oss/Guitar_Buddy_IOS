@@ -47,6 +47,18 @@ final class MiniRecorder: NSObject, ObservableObject, AVAudioRecorderDelegate {
         }
 
     }
+    @discardableResult
+    func renameFile(_ url: URL, to newName: String) -> URL?{
+        let newURL = url.deletingLastPathComponent().appendingPathComponent(newName).appendingPathExtension("wav")
+        do{
+            try FileManager.default.moveItem(at: url, to: newURL)
+            if fileURL == url {fileURL = newURL}
+            return newURL
+        } catch {
+            print("Could not Rename File: \(error)")
+            return nil
+        }
+    }
     private func startMetering() {
         meterTimer?.cancel()
         meterTimer = Timer.publish(every: 0.05, on: .main, in: .common)

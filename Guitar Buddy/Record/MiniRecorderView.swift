@@ -13,6 +13,9 @@ struct MiniRecorderView: View {
     @StateObject private var rec = MiniRecorder()
     @State private var recordings: [URL] = []
     @StateObject private var player = MiniPlayer()
+    @State private var selectedURL: URL?
+    @State private var showAlert = false
+    @State private var userInput = ""
 
     var body: some View {
         GeometryReader { geo in
@@ -131,7 +134,7 @@ struct MiniRecorderView: View {
                                         .buttonStyle(.plain)
 
                                         Text(url.lastPathComponent)
-                                            .font(.system(size: 17 * xScale, weight: .bold, design: .rounded))
+                                            .font(.system(size: 14 * xScale, weight: .bold, design: .rounded))
                                             .foregroundStyle(Color(.black))
                                             .lineLimit(1)
                                             .truncationMode(.middle)
@@ -139,6 +142,32 @@ struct MiniRecorderView: View {
                                             .frame(width: 70 * xScale)
 
                                         Spacer()
+                                        
+                                        Button {
+                                            selectedURL = url
+                                            showAlert = true
+                                        } label: {
+                                            Image(systemName: "pencil")
+                                                .foregroundStyle(.green)
+                                                .font(.system(size: 25 * xScale))
+                                        }
+                                        .alert("Rename file", isPresented: $showAlert){
+                                            TextField("New Filename", text: $userInput)
+                                            Button("OK") {
+                                                let trimmed = userInput.trimmingCharacters(in: .whitespacesAndNewlines)
+                                                if trimmed != ""{
+                                                    if player.playingURL == selectedURL {
+                                                        player.stop()
+                                                    }
+                                                    if let selectedURL {
+                                                        rec.renameFile(selectedURL, to: trimmed)
+                                                    }
+                                                    recordings = recordingList()
+                                                    userInput = ""
+                                                }
+                                            }
+                                        }
+                                        .buttonStyle(.plain)
 
                                         Button {
                                             try? FileManager.default.removeItem(at: url)
@@ -169,7 +198,7 @@ struct MiniRecorderView: View {
                         }
                         .frame(height: 250)
                         .offset(y: -5)
-                        // control panel, styled to look like an amp faceplate — drawn last so it sits above the scroll content
+                        // control panel
                         ZStack {
                             RoundedRectangle(cornerRadius: 14)
                                 .fill(Color(red: 228/255, green: 205/255, blue: 158/255))
