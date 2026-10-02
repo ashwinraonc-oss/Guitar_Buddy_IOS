@@ -45,7 +45,8 @@ struct BarVisualizer: View {
 
                     Rectangle()
                         .fill(.primary.opacity(0.85))
-                        .fill(Color(.white))
+//                        .fill(Color(red: 59/255, green: 59/255, blue: 59/255))
+                        .fill(Color(.orange))
                         .frame(width: safeBarWidth, height: barHeight)
                         .cornerRadius(safeBarWidth / 2)
 
