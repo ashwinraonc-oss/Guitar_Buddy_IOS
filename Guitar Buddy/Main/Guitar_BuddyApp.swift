@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct Guitar_BuddyApp: App {
@@ -26,5 +27,6 @@ struct Guitar_BuddyApp: App {
                 }
             }
         }
+        .modelContainer(for: RecorderModel.self)
     }
 }

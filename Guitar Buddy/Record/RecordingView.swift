@@ -17,7 +17,7 @@ struct MiniRecorderView: View {
     @State private var showAlert = false
     @State private var showDeleteAlert = false
     @State private var userInput = ""
-    
+
     var body: some View {
         GeometryReader { geo in
             let w = geo.size.width
@@ -26,24 +26,24 @@ struct MiniRecorderView: View {
             let yScale = h / 844
             VStack {
                 VStack(spacing: 30) {
-                    Text("Record")
-                        .font(.system(size: 30 * xScale, weight: .bold, design: .rounded))
-                        .padding(.top, 10 * yScale)
-                        .padding(.bottom, 10 * yScale)
-                        .foregroundStyle(Color(red: 9/255, green: 21/255, blue: 64/255))
-                        .padding(.horizontal, 20 * xScale)
-                        .background(Color(red: 255/255, green: 255/255, blue: 242/255))
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color.black, lineWidth: 3)
-                        )
-                    
-                    ProgressView(value: rec.meterLevel)
-                        .progressViewStyle(.linear)
-                        .animation(.linear, value: rec.meterLevel)
-                        .tint(.green)
-                    
+//                    Text("Record")
+//                        .font(.system(size: 30 * xScale, weight: .bold, design: .rounded))
+//                        .padding(.top, 10 * yScale)
+//                        .padding(.bottom, 10 * yScale)
+//                        .foregroundStyle(Color(red: 9/255, green: 21/255, blue: 64/255))
+//                        .padding(.horizontal, 20 * xScale)
+//                        .background(Color(red: 255/255, green: 255/255, blue: 242/255))
+//                        .clipShape(RoundedRectangle(cornerRadius: 12))
+//                        .overlay(
+//                            RoundedRectangle(cornerRadius: 12)
+//                                .stroke(Color.black, lineWidth: 3)
+//                        )
+
+//                    ProgressView(value: rec.meterLevel)
+//                        .progressViewStyle(.linear)
+//                        .animation(.linear, value: rec.meterLevel)
+//                        .tint(.green)
+
                     Text("File: \(rec.fileURL?.lastPathComponent ?? "")")
                         .font(.system(size: 16 * xScale, weight: .bold, design: .rounded))
                         .foregroundStyle(Color(red: 9/255, green: 21/255, blue: 64/255))
@@ -71,28 +71,51 @@ struct MiniRecorderView: View {
                                     .stroke(Color.black, lineWidth: 4)
                             )
                             .frame(width: 370, height: 450)
+                            // speaker grille texture — thin horizontal/vertical lines clipped to the card
+                            .overlay(
+                                Canvas { context, size in
+                                    let spacing: CGFloat = 16
+                                    var x: CGFloat = spacing
+                                    while x < size.width {
+                                        var path = Path()
+                                        path.move(to: CGPoint(x: x, y: 0))
+                                        path.addLine(to: CGPoint(x: x, y: size.height))
+                                        context.stroke(path, with: .color(.teal.opacity(0.3)), lineWidth: 0.75)
+                                        x += spacing
+                                    }
+                                    var y: CGFloat = spacing
+                                    while y < size.height {
+                                        var path = Path()
+                                        path.move(to: CGPoint(x: 0, y: y))
+                                        path.addLine(to: CGPoint(x: size.width, y: y))
+                                        context.stroke(path, with: .color(.teal.opacity(0.3)), lineWidth: 0.75)
+                                        y += spacing
+                                    }
+                                }
+                                .clipShape(RoundedRectangle(cornerRadius: 16))
+                            )
                         // corner protectors — bottom two hug this card's bottom corners
-                            .overlay(alignment: .bottomLeading) {
-                                UnevenRoundedRectangle(topLeadingRadius: 3, bottomLeadingRadius: 18, bottomTrailingRadius: 3, topTrailingRadius: 3)
-                                    .stroke(Color.black, lineWidth: 8)
-                                    .fill(Color(red: 59/255, green: 59/255, blue: 59/255))
-                                    .frame(width: 25, height: 25)
-                                    .offset(x: -3, y: 3)
-                            }
-                            .overlay(alignment: .bottomTrailing) {
-                                UnevenRoundedRectangle(topLeadingRadius: 3, bottomLeadingRadius: 3, bottomTrailingRadius: 18, topTrailingRadius: 3)
-                                    .stroke(Color(.black), lineWidth: 8)
-                                    .fill(Color(red: 59/255, green: 59/255, blue: 59/255))
-                                    .frame(width: 25, height: 25)
-                                    .offset(x: 3, y: 3)
-                            }
-                            .offset(y: -90)
+//                            .overlay(alignment: .bottomLeading) {
+//                                UnevenRoundedRectangle(topLeadingRadius: 3, bottomLeadingRadius: 18, bottomTrailingRadius: 3, topTrailingRadius: 3)
+//                                    .stroke(Color.black, lineWidth: 8)
+//                                    .fill(Color(red: 59/255, green: 59/255, blue: 59/255))
+//                                    .frame(width: 25, height: 25)
+//                                    .offset(x: -3, y: 3)
+//                            }
+//                            .overlay(alignment: .bottomTrailing) {
+//                                UnevenRoundedRectangle(topLeadingRadius: 3, bottomLeadingRadius: 3, bottomTrailingRadius: 18, topTrailingRadius: 3)
+//                                    .stroke(Color(.black), lineWidth: 8)
+//                                    .fill(Color(red: 59/255, green: 59/255, blue: 59/255))
+//                                    .frame(width: 25, height: 25)
+//                                    .offset(x: 3, y: 3)
+//                            }
+                            .offset(y: -70)
                             .scaleEffect(1.05)
-                        
+
                         ///
                         BarVisualizer(values: rec.isRecording ? rec.meterHistory : player.meterHistory, barCount: 24)
                             .frame(width: 340, height: 50)
-                            .offset(y: -290)///
+                            .offset(y: -270)///
                             .scaleEffect(1.0)
                         ScrollView {
                             VStack(spacing: 2 * yScale) {
@@ -106,12 +129,12 @@ struct MiniRecorderView: View {
                                             }
                                         } label: {
                                             Image(systemName: (player.playingURL == url && player.isPlaying) ? "pause.fill" : "play.fill")
-                                                .foregroundStyle((player.playingURL == url && player.isPlaying) ? .red: .green)
+                                                .foregroundStyle((player.playingURL == url && player.isPlaying) ? .red: .white)
                                                 .font(.system(size: 25 * xScale))
-                                            
+
                                         }
                                         .buttonStyle(.plain)
-                                        
+
                                         Text(url.lastPathComponent)
                                             .font(.system(size: 14 * xScale, weight: .bold, design: .rounded))
                                             .foregroundStyle(Color(.white))
@@ -119,15 +142,15 @@ struct MiniRecorderView: View {
                                             .truncationMode(.middle)
                                         ProgressView(value: player.playingURL == url ? player.progress : 0)
                                             .frame(width: 70 * xScale)
-                                        
+
                                         Spacer()
-                                        
+
                                         Button {
                                             selectedURL = url
                                             showAlert = true
                                         } label: {
                                             Image(systemName: "pencil")
-                                                .foregroundStyle(.green)
+                                                .foregroundStyle(.white)
                                                 .font(.system(size: 25 * xScale))
                                         }
                                         .alert("Rename file", isPresented: $showAlert){
@@ -147,7 +170,7 @@ struct MiniRecorderView: View {
                                             }
                                         }
                                         .buttonStyle(.plain)
-                                        
+
                                         Button {
                                             showDeleteAlert = true
                                         } label: {
@@ -166,9 +189,9 @@ struct MiniRecorderView: View {
                                                 }
                                                 recordings = recordingList()
                                             }
-                                            
+
                                         }
-                                        
+
                                         .buttonStyle(.plain)
                                     }
                                     .padding(.horizontal, 10 * xScale)
@@ -186,7 +209,7 @@ struct MiniRecorderView: View {
                             .padding(.vertical, 4 * yScale)
                         }
                         .frame(height: 370)
-                        .offset(y: -80)///
+                        .offset(y: -60)///
                         // control panel
                         ZStack {
                             RoundedRectangle(cornerRadius: 14)
@@ -196,25 +219,25 @@ struct MiniRecorderView: View {
                                     RoundedRectangle(cornerRadius: 14)
                                         .stroke(Color.black, lineWidth: 4)
                                 )
-                                .frame(width: 360, height: 100)
+                                .frame(width: 400, height: 100)
                             // corner protectors — top two hug this control panel's top corners
-                                .overlay(alignment: .topLeading) {
-                                    UnevenRoundedRectangle(topLeadingRadius: 18, bottomLeadingRadius: 3, bottomTrailingRadius: 3, topTrailingRadius: 3)
-                                        .stroke(Color.black, lineWidth: 8)
-                                        .fill(Color(red: 59/255, green: 59/255, blue: 59/255))
-                                        .frame(width: 25, height: 25)
-                                        .offset(x: -3, y: -3)
-                                }
-                                .overlay(alignment: .topTrailing) {
-                                    UnevenRoundedRectangle(topLeadingRadius: 3, bottomLeadingRadius: 3, bottomTrailingRadius: 3, topTrailingRadius: 18)
-                                        .stroke(Color.black, lineWidth: 8)
-                                        .fill(Color(red: 59/255, green: 59/255, blue: 59/255))
-                                        .frame(width: 25, height: 25)
-                                        .offset(x: 3, y: -3)
-                                }
-                                .scaleEffect(1.05)
-                            
-                            HStack(spacing: 26) {
+//                                .overlay(alignment: .topLeading) {
+//                                    UnevenRoundedRectangle(topLeadingRadius: 18, bottomLeadingRadius: 3, bottomTrailingRadius: 3, topTrailingRadius: 3)
+//                                        .stroke(Color.black, lineWidth: 8)
+//                                        .fill(Color(red: 59/255, green: 59/255, blue: 59/255))
+//                                        .frame(width: 25, height: 25)
+//                                        .offset(x: -3, y: -3)
+//                                }
+//                                .overlay(alignment: .topTrailing) {
+//                                    UnevenRoundedRectangle(topLeadingRadius: 3, bottomLeadingRadius: 3, bottomTrailingRadius: 3, topTrailingRadius: 18)
+//                                        .stroke(Color.black, lineWidth: 8)
+//                                        .fill(Color(red: 59/255, green: 59/255, blue: 59/255))
+//                                        .frame(width: 25, height: 25)
+//                                        .offset(x: 3, y: -3)
+//                                }
+//                                .scaleEffect(1.05)
+
+                            HStack(alignment: .bottom, spacing: 18) {
                                 VStack(spacing: 6) {
                                     Button {
                                         if rec.isRecording {
@@ -303,11 +326,26 @@ struct MiniRecorderView: View {
                                         .font(.system(size: 13 * xScale, weight: .bold, design: .rounded))
                                         .foregroundStyle(.black)
                                 }
+                                // 1/4" input jack — decorative, no action
+                                VStack(spacing: 6) {
+                                    ZStack {
+                                        Circle()
+                                            .fill(Color(red: 180/255, green: 180/255, blue: 185/255))
+                                            .frame(width: 45, height: 45)
+                                        Circle()
+                                            .fill(Color.black)
+                                            .frame(width: 20, height: 20)
+                                    }
+                                    .overlay(Circle().stroke(Color.black, lineWidth: 3))
+                                    Text("Input")
+                                        .font(.system(size: 13 * xScale, weight: .bold, design: .rounded))
+                                        .foregroundStyle(.black)
+                                }
                             }
                             .frame(height: 90)
                         }
-                        .offset(y: -400)
-                        .scaleEffect(1.05)
+                        .offset(y: -395)
+                        .scaleEffect(0.97)
                     }
                     .frame(width: 400, height: 570)
                     .offset(y: 90)
@@ -333,7 +371,7 @@ struct MiniRecorderView: View {
             .url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
             .appendingPathComponent("Recording", isDirectory: true)
         guard let dir, let files = try? FileManager.default.contentsOfDirectory(at: dir, includingPropertiesForKeys: nil) else { return [] }
-        
+
         return files.filter { $0.pathExtension == "wav" }
             .sorted { url1, url2 in
                 let date1 = (try? url1.resourceValues(forKeys: [.creationDateKey]))?.creationDate ?? .distantPast

@@ -18,6 +18,7 @@ struct RootViewUpdated: View {
     @StateObject private var progression = ProgressionController()
     @StateObject private var tunerPlayer = ChordPlayer()
     
+    
     init(){
         let recorder = AudioController()
         self._recorder = StateObject(wrappedValue: recorder)
