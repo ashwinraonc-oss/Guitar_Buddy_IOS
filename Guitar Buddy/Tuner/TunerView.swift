@@ -50,19 +50,19 @@ struct TunerView: View {
                 let noteAngles = [-75.0, -45.0, -15.0, 15.0, 45.0, 75.0]
                 VStack {
                     VStack {
-                        Text("Tuner")
-                            .font(.system(size: 27, weight: .bold))
-                            .padding(.top, 10)
-                            .padding(.bottom, 10)
-                            .foregroundStyle(Color(red: 9/255, green: 21/255, blue: 64/255))
-                            .padding(.horizontal, 20)
-                            .padding(.vertical, 0)
-                            .background(Color.yellow)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .stroke(Color.black, lineWidth: 3)
-                            )
+//                        Text("Tuner")
+//                            .font(.system(size: 27, weight: .bold))
+//                            .padding(.top, 10)
+//                            .padding(.bottom, 10)
+//                            .foregroundStyle(Color(red: 9/255, green: 21/255, blue: 64/255))
+//                            .padding(.horizontal, 20)
+//                            .padding(.vertical, 0)
+//                            .background(Color.yellow)
+//                            .clipShape(RoundedRectangle(cornerRadius: 12))
+//                            .overlay(
+//                                RoundedRectangle(cornerRadius: 12)
+//                                    .stroke(Color.black, lineWidth: 3)
+//                            )
                         ZStack {
                             ForEach(0..<6, id: \.self) { i in
                                 let angle = noteAngles[i] * .pi / 180
@@ -231,7 +231,7 @@ struct TunerView: View {
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
                 }
-                .offset(y: 0)
+                .offset(y: 50)
                 .background(Color(red: 191/255, green: 64/255, blue: 191/255).ignoresSafeArea())
             } else {
                 ElectricTunerView(tuner: tuner)

@@ -14,19 +14,27 @@ class LayerPlayer: ObservableObject {
     private var activeNodes: [AVAudioPlayerNode] = []
     
     init(){
-        try? engine.start()
+        do {
+            let session = AVAudioSession.sharedInstance()
+            try session.setCategory(.playAndRecord, options: [.defaultToSpeaker])
+            try session.setActive(true)
+            _ = engine.mainMixerNode
+            try engine.start()
+        } catch {
+            print("Session setup failed: \(error)")
+        }
     }
-    
+
     func playStack(recording: RecorderModel){
         stopNodes(nodes: activeNodes)
-        var recordingList: [RecorderModel]  = [recording]
+        var recordingList: [RecorderModel] = [recording]
         if let layers = recording.layers {
             for rec in layers {
                 recordingList.append(rec)
             }
         }
         buildNodes(recordings: recordingList)
-        
+
         guard let lastRenderTime = engine.outputNode.lastRenderTime else { return }
         let sampleRate = engine.outputNode.outputFormat(forBus: 0).sampleRate
         let startSampleTime = lastRenderTime.sampleTime + AVAudioFramePosition(sampleRate * 0.1)
@@ -38,11 +46,13 @@ class LayerPlayer: ObservableObject {
     }
     
     func buildNodes(recordings: [RecorderModel]){
+        let format = engine.outputNode.outputFormat(forBus: 0)
+        guard format.sampleRate > 0 else { return }
         for recording in recordings{
             guard let recordingURL = Self.fileURL(filename: recording.fileName) else { continue }
             let newNode = AVAudioPlayerNode()
             guard let audioFile = try? AVAudioFile(forReading: recordingURL) else { continue }
-            
+
             engine.attach(newNode)
             engine.connect(newNode, to: engine.mainMixerNode, format: audioFile.processingFormat)
             newNode.scheduleFile(audioFile, at: nil)
@@ -64,6 +74,10 @@ class LayerPlayer: ObservableObject {
             engine.detach(node)
         }
         activeNodes.removeAll()
+    }
+    
+    func stop() {
+        stopNodes(nodes: activeNodes)
     }
 }
 

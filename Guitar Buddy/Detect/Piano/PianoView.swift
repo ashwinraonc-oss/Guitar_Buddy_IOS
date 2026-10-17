@@ -24,6 +24,7 @@ struct PianoView: View {
             let h = geo.size.height
             let xScale = w / 390
             let yScale = h / 844
+            let uiScale = min(w / 440, h / 811) // 440 x 811 = this view's size on iPhone 17 Pro Max
 
             ZStack{
                 Color(red: 210/255, green: 125/255, blue: 45/255)
@@ -89,24 +90,25 @@ struct PianoView: View {
                             }
                         }
                     }
-                    .scaleEffect(1.3)
+                    .scaleEffect(1.3 * uiScale, anchor: .top)
                 }
-                .offset(y: 300)
+                // keys' top edge sits at 25.2% of the view height (measured on iPhone 17 Pro Max, h = 811)
+                .offset(y: 0.2524 * h - 1.5 * 1.3 * uiScale)
                 
                 if let chord = recorder.detectedChord {
                     VStack {
                         HStack {
-                            Text("Chord Detected:").font(.system(size: 25))
+                            Text("Chord Detected:").font(.system(size: 25 * uiScale))
                                 .foregroundStyle(Color(.white))
                             let chordCap = chord.strictCapitalized
                             Text(chordCap)
-                                .font(.system(size: 40))
+                                .font(.system(size: 40 * uiScale))
                                 .foregroundStyle(Color(red: 9/255, green: 21/255, blue: 64/255))
                                 .lineLimit(1)
                                 .minimumScaleFactor(0.2)
                                 .frame(maxWidth: 100 * xScale)
-                                .padding(.horizontal, 16)
-                                .padding(.vertical, 8)
+                                .padding(.horizontal, 16 * uiScale)
+                                .padding(.vertical, 8 * uiScale)
                                 .background(Color(red: 88/255, green: 217/255, blue: 99/255))
                                 .clipShape(RoundedRectangle(cornerRadius: 12))
                                 .overlay(
@@ -122,22 +124,22 @@ struct PianoView: View {
                                 
                             } label: {
                                 Image(systemName: "play.circle.fill")
-                                    .font(.system(size: 26))
+                                    .font(.system(size: 26 * uiScale))
                                     .foregroundStyle(.black)
                             }
                         }
                         if let notes = recorder.detectedNotes {
                             HStack {
-                                Text("Notes Played:").font(.system(size: 25))
+                                Text("Notes Played:").font(.system(size: 25 * uiScale))
                                     .foregroundStyle(Color(.white))
                                 Text("\(notes.joined(separator: ", "))")
-                                    .font(.system(size: 40))
+                                    .font(.system(size: 40 * uiScale))
                                     .lineLimit(1)
                                     .minimumScaleFactor(0.2)
                                     .frame(maxWidth: 100 * xScale)
                                     .foregroundStyle(Color(red: 9/255, green: 21/255, blue: 64/255))
-                                    .padding(.horizontal, 16)
-                                    .padding(.vertical, 8)
+                                    .padding(.horizontal, 16 * uiScale)
+                                    .padding(.vertical, 8 * uiScale)
                                     .background(Color(red: 88/255, green: 217/255, blue: 99/255))
                                     .clipShape(RoundedRectangle(cornerRadius: 12))
                                     .overlay(
@@ -149,18 +151,18 @@ struct PianoView: View {
                                     chordPlayer.playPianoChord(midiArray: recorder.midiNotes)
                                 } label: {
                                     Image(systemName: "play.circle.fill")
-                                        .font(.system(size: 26))
+                                        .font(.system(size: 26 * uiScale))
                                         .foregroundStyle(.black)
                                 }
                             }
                         }
                         if recorder.detectedChord == nil && recorder.isDetecting == false && recorder.failedConnection == false {
                             Text("Detect")
-                                .font(.system(size: 30, weight: .bold))
-                                .padding(.top, 10)
-                                .padding(.bottom, 10)
+                                .font(.system(size: 30 * uiScale, weight: .bold))
+                                .padding(.top, 10 * uiScale)
+                                .padding(.bottom, 10 * uiScale)
                                 .foregroundStyle(Color(red: 9/255, green: 21/255, blue: 64/255))
-                                .padding(.horizontal, 20)
+                                .padding(.horizontal, 20 * uiScale)
                                 .padding(.vertical, 0)
                                 .background(Color(red: 88/255, green: 217/255, blue: 99/255))
                                 .clipShape(RoundedRectangle(cornerRadius: 12))
@@ -196,7 +198,7 @@ struct PianoView: View {
                                 }
                                 .frame(width: 130 * xScale, height: 130 * xScale)
                                 .offset(x: 0, y: 570 * yScale)
-                                .padding(.top, 10)
+                                .padding(.top, 10 * uiScale)
                         }
                     }
                     .font(.system(size: 28 * xScale))

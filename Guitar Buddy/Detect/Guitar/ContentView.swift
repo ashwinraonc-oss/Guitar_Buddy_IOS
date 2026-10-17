@@ -84,6 +84,7 @@ struct ContentView: View {
             let h = geo.size.height
             let xScale = w / 390
             let yScale = h / 844
+            let uiScale = w / 440
             ZStack{
                 switch ViewMode{
                 case .guitar:
@@ -117,30 +118,29 @@ struct ContentView: View {
                                                 RoundedRectangle(cornerRadius: 20)
                                                     .fill(Color.black)
                                                     .frame(width: 130 * xScale, height: 400 * yScale)
-                                                    .offset(x: 5, y: 260 * yScale)
+                                                    .offset(x: 5 * uiScale, y: 260 * yScale)
                                             )
                                         Rectangle().fill(Color.black).frame(width: 130 * xScale, height: 4).offset(x: 0, y: 378 * yScale)
                                         Rectangle().fill(Color.black).frame(width: 130 * xScale, height: 4).offset(x: 0, y: 328 * yScale)
                                         Rectangle().fill(Color.black).frame(width: 130 * xScale, height: 4).offset(x: 0, y: 278 * yScale)
                                         Rectangle().fill(Color.black).frame(width: 130 * xScale, height: 4).offset(x: 0, y: 228 * yScale)
                                         Rectangle().fill(Color.black).frame(width: 130 * xScale, height: 4).offset(x: 0, y: 178 * yScale)
-                                        Rectangle().fill(Color.black).frame(width: 130 * xScale, height: 4).offset(x: 0, y: 128 * yScale)
                                     }
                                 
                                 if let chord = recorder.detectedChord {
                                     VStack {
                                         HStack {
-                                            Text("Chord Detected:").font(.system(size: 25))
+                                            Text("Chord Detected:").font(.system(size: 25 * uiScale))
                                                 .foregroundStyle(Color(.white))
                                             let chordCap = chord.strictCapitalized
                                             Text(chordCap)
                                                 .foregroundStyle(Color(red: 9/255, green: 21/255, blue: 64/255))
-                                                .font(.system(size: 40))
+                                                .font(.system(size: 40 * uiScale))
                                                 .lineLimit(1)
                                                 .minimumScaleFactor(0.2)
                                                 .frame(maxWidth: 100 * xScale)
-                                                .padding(.horizontal, 16)
-                                                .padding(.vertical, 8)
+                                                .padding(.horizontal, 16 * uiScale)
+                                                .padding(.vertical, 8 * uiScale)
                                                 .background(Color(red: 88/255, green: 217/255, blue: 99/255))
                                                 .clipShape(RoundedRectangle(cornerRadius: 12))
                                                 .overlay(
@@ -159,23 +159,23 @@ struct ContentView: View {
                                                 }
                                             } label: {
                                                 Image(systemName: "play.circle.fill")
-                                                    .font(.system(size: 26))
+                                                    .font(.system(size: 26 * uiScale))
                                                     .foregroundStyle(.black)
                                             }
                                         
                                         }
                                         if let notes = recorder.detectedNotes {
                                             HStack {
-                                                Text("Notes Played:").font(.system(size: 25))
+                                                Text("Notes Played:").font(.system(size: 25 * uiScale))
                                                     .foregroundStyle(Color(.white))
                                                 Text("\(notes.joined(separator: ", "))")
-                                                    .font(.system(size: 40))
+                                                    .font(.system(size: 40 * uiScale))
                                                     .lineLimit(1)
                                                     .minimumScaleFactor(0.2)
                                                     .frame(maxWidth: 100 * xScale)
                                                     .foregroundStyle(Color(red: 9/255, green: 21/255, blue: 64/255))
-                                                    .padding(.horizontal, 16)
-                                                    .padding(.vertical, 8)
+                                                    .padding(.horizontal, 16 * uiScale)
+                                                    .padding(.vertical, 8 * uiScale)
                                                     .background(Color(red: 88/255, green: 217/255, blue: 99/255))
                                                     .clipShape(RoundedRectangle(cornerRadius: 12))
                                                     .overlay(
@@ -191,8 +191,7 @@ struct ContentView: View {
                                                     }
                                                 } label: {
                                                     Image(systemName: "play.circle.fill")
-                                                        .font(.system(size: 26
-                                                                ))
+                                                        .font(.system(size: 26 * uiScale))
                                                         .foregroundStyle(.black)
                                                 }
                                             }
@@ -201,27 +200,27 @@ struct ContentView: View {
                                     }
                                     .font(.system(size: 28 * xScale))
                                     .bold()
-                                    .offset(x: 0, y: 595 * yScale)
+                                    .offset(x: 0, y: min(595 * yScale, h - 195)) // capped so the readout stays above the tab bar on short screens
                                     .modifier(ShimmerModifier())
                                 }
-                                if recorder.detectedChord == nil && recorder.isDetecting == false && recorder.failedConnection == false{
-                                    HStack{
-                                        Text("Detect")
-                                            .font(.system(size: 30, weight: .bold))
-                                            .padding(.top, 10)
-                                            .padding(.bottom, 10)
-                                            .foregroundStyle(Color(red: 9/255, green: 21/255, blue: 64/255))
-                                            .padding(.horizontal, 20)
-                                            .padding(.vertical, 0)
-                                            .background(Color(red: 88/255, green: 217/255, blue: 99/255))
-                                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                                            .overlay(
-                                                RoundedRectangle(cornerRadius: 12)
-                                                    .stroke(Color.black, lineWidth: 3)
-                                            )
-                                            .offset(x: 0, y: 600 * yScale)
-                                    }
-                                }
+//                                if recorder.detectedChord == nil && recorder.isDetecting == false && recorder.failedConnection == false{
+//                                    HStack{
+//                                        Text("Detect")
+//                                            .font(.system(size: 30, weight: .bold))
+//                                            .padding(.top, 10)
+//                                            .padding(.bottom, 10)
+//                                            .foregroundStyle(Color(red: 9/255, green: 21/255, blue: 64/255))
+//                                            .padding(.horizontal, 20)
+//                                            .padding(.vertical, 0)
+//                                            .background(Color(red: 88/255, green: 217/255, blue: 99/255))
+//                                            .clipShape(RoundedRectangle(cornerRadius: 12))
+//                                            .overlay(
+//                                                RoundedRectangle(cornerRadius: 12)
+//                                                    .stroke(Color.black, lineWidth: 3)
+//                                            )
+//                                            .offset(x: 0, y: 600 * yScale)
+//                                    }
+//                                }
                                 
                                 if recorder.failedConnection == true {
                                     
@@ -249,7 +248,7 @@ struct ContentView: View {
                                         }
                                         .frame(width: 130 * xScale, height: 130 * xScale)
                                         .offset(x: 0, y: 570 * yScale)
-                                        .padding(.top, 10)
+                                        .padding(.top, 10 * uiScale)
                                 }
                                 
                                 if recorder.micPermissionDenied == true{
@@ -364,10 +363,10 @@ struct ContentView: View {
                                         voicingIndex = max(voicingIndex - 1, 0)
                                     } label: {
                                         Image(systemName: "chevron.left")
-                                            .font(.system(size: 20, weight: .bold))
+                                            .font(.system(size: 20 * uiScale, weight: .bold))
                                             .foregroundStyle(.black)
-                                            .padding(.horizontal, 12)
-                                            .padding(.vertical, 8)
+                                            .padding(.horizontal, 12 * uiScale)
+                                            .padding(.vertical, 8 * uiScale)
                                             .background(Color(red: 88/255, green: 217/255, blue: 99/255).opacity(1))
                                             .clipShape(Capsule())
                                             .overlay(
@@ -399,10 +398,10 @@ struct ContentView: View {
                                         voicingIndex = min(voicingIndex + 1, sorted.count - 1)
                                     } label: {
                                         Image(systemName: "chevron.right")
-                                            .font(.system(size: 20, weight: .bold))
+                                            .font(.system(size: 20 * uiScale, weight: .bold))
                                             .foregroundStyle(.black)
-                                            .padding(.horizontal, 12)
-                                            .padding(.vertical, 8)
+                                            .padding(.horizontal, 12 * uiScale)
+                                            .padding(.vertical, 8 * uiScale)
                                             .background(Color(red: 88/255, green: 217/255, blue: 99/255).opacity(1))
                                             .clipShape(Capsule())
                                             .overlay(
@@ -432,15 +431,15 @@ struct ContentView: View {
                     }
                 } label:{
                     Image(systemName: "pianokeys")
-                        .font(.system(size: 40, weight: .bold))
+                        .font(.system(size: 40 * uiScale, weight: .bold))
                         .foregroundStyle(.black)
                         .background(alignment: .center) {
                             Rectangle()
                                 .fill(Color.white)
-                                .frame(width: 40, height: 30)
+                                .frame(width: 40 * uiScale, height: 30 * uiScale)
                         }
                 }
-                .offset(x: 135, y: 0)
+                .offset(x: 135 * uiScale, y: 0)
                 .opacity(ViewMode == .piano ? 0.5 : 1)
             }
         .overlay(alignment: .top){
@@ -452,15 +451,15 @@ struct ContentView: View {
                 }
             } label:{
                 Image(systemName: "questionmark.square")
-                    .font(.system(size: 40, weight: .bold))
+                    .font(.system(size: 40 * uiScale, weight: .bold))
                     .foregroundStyle(.black)
                     .background(alignment: .center) {
                         Rectangle()
                             .fill(Color.white)
-                            .frame(width: 30, height: 30)
+                            .frame(width: 30 * uiScale, height: 30 * uiScale)
                     }
             }
-            .offset(x: 185, y: 0)
+            .offset(x: 185 * uiScale, y: 0)
             .opacity(ViewMode == .instructions ? 0.5 : 1)
             }
 //        .overlay{

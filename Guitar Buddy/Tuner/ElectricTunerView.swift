@@ -29,19 +29,19 @@ struct ElectricTunerView: View {
         }
         VStack{
             VStack {
-                Text("Tuner")
-                    .font(.system(size: 27, weight: .bold))
-                    .padding(.top, 10)
-                    .padding(.bottom, 10)
-                    .foregroundStyle(Color(red: 9/255, green: 21/255, blue: 64/255))
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 0)
-                    .background(Color.yellow)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.black, lineWidth: 3)
-                    )
+//                Text("Tuner")
+//                    .font(.system(size: 27, weight: .bold))
+//                    .padding(.top, 10)
+//                    .padding(.bottom, 10)
+//                    .foregroundStyle(Color(red: 9/255, green: 21/255, blue: 64/255))
+//                    .padding(.horizontal, 20)
+//                    .padding(.vertical, 0)
+//                    .background(Color.yellow)
+//                    .clipShape(RoundedRectangle(cornerRadius: 12))
+//                    .overlay(
+//                        RoundedRectangle(cornerRadius: 12)
+//                            .stroke(Color.black, lineWidth: 3)
+//                    )
                 ZStack{
                     let allTickAngles = stride(from: -45.0, through: 45.0, by: 5.0).map { $0 }
                     ForEach(0..<allTickAngles.count, id: \.self) { i in

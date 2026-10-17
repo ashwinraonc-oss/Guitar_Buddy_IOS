@@ -15,7 +15,7 @@ class RecorderModel {
     var displayName: String = ""
     var createdDate: Date?
     @Relationship var parent: RecorderModel?
-    @Relationship(inverse: \RecorderModel.parent) var layers: [RecorderModel]?
+    @Relationship(deleteRule: .cascade, inverse: \RecorderModel.parent) var layers: [RecorderModel]?
     
     init(fileName: String, displayName: String, createdDate: Date?, parent: RecorderModel?, layers: [RecorderModel]){
         self.fileName = fileName

@@ -8,15 +8,21 @@
 import SwiftUI
 import Combine
 import AVFoundation
+import SwiftData
 
 struct MiniRecorderView: View {
     @StateObject private var rec = MiniRecorder()
-    @State private var recordings: [URL] = []
     @StateObject private var player = MiniPlayer()
-    @State private var selectedURL: URL?
-    @State private var showAlert = false
-    @State private var showDeleteAlert = false
+    @State private var selectedRecording: RecorderModel?
+    @State private var deleteTarget: RecorderModel?
     @State private var userInput = ""
+    @State private var layerTarget: RecorderModel?
+    @StateObject private var layerPlayer = LayerPlayer()
+    
+    @Query(filter: #Predicate<RecorderModel> { $0.parent == nil })
+    private var recordings: [RecorderModel]
+    
+    @Environment(\.modelContext) private var modelContext
 
     var body: some View {
         GeometryReader { geo in
@@ -26,24 +32,6 @@ struct MiniRecorderView: View {
             let yScale = h / 844
             VStack {
                 VStack(spacing: 30) {
-//                    Text("Record")
-//                        .font(.system(size: 30 * xScale, weight: .bold, design: .rounded))
-//                        .padding(.top, 10 * yScale)
-//                        .padding(.bottom, 10 * yScale)
-//                        .foregroundStyle(Color(red: 9/255, green: 21/255, blue: 64/255))
-//                        .padding(.horizontal, 20 * xScale)
-//                        .background(Color(red: 255/255, green: 255/255, blue: 242/255))
-//                        .clipShape(RoundedRectangle(cornerRadius: 12))
-//                        .overlay(
-//                            RoundedRectangle(cornerRadius: 12)
-//                                .stroke(Color.black, lineWidth: 3)
-//                        )
-
-//                    ProgressView(value: rec.meterLevel)
-//                        .progressViewStyle(.linear)
-//                        .animation(.linear, value: rec.meterLevel)
-//                        .tint(.green)
-
                     Text("File: \(rec.fileURL?.lastPathComponent ?? "")")
                         .font(.system(size: 16 * xScale, weight: .bold, design: .rounded))
                         .foregroundStyle(Color(red: 9/255, green: 21/255, blue: 64/255))
@@ -56,15 +44,8 @@ struct MiniRecorderView: View {
                         .truncationMode(.middle)
                         .opacity(rec.fileURL == nil ? 0 : 0)
                     ZStack {
-                        // handle
-                        //                        Ellipse()
-                        //                            .trim(from: 0.5, to: 1.0)
-                        //                            .stroke(Color.black, lineWidth: 7)
-                        //                            .frame(width: 154, height: 40)
-                        //                            .offset(y: -375)
                         //recordings background
                         RoundedRectangle(cornerRadius: 16)
-                        //                            .fill(Color(red: 228/255, green: 205/255, blue: 158/255))
                             .fill(Color(red: 255/255, green: 255/255, blue: 242/255))
                             .overlay(
                                 RoundedRectangle(cornerRadius: 16)
@@ -80,7 +61,7 @@ struct MiniRecorderView: View {
                                         var path = Path()
                                         path.move(to: CGPoint(x: x, y: 0))
                                         path.addLine(to: CGPoint(x: x, y: size.height))
-                                        context.stroke(path, with: .color(.teal.opacity(0.3)), lineWidth: 0.75)
+                                        context.stroke(path, with: .color(.gray.opacity(0.7)), lineWidth: 0.3)
                                         x += spacing
                                     }
                                     var y: CGFloat = spacing
@@ -88,27 +69,12 @@ struct MiniRecorderView: View {
                                         var path = Path()
                                         path.move(to: CGPoint(x: 0, y: y))
                                         path.addLine(to: CGPoint(x: size.width, y: y))
-                                        context.stroke(path, with: .color(.teal.opacity(0.3)), lineWidth: 0.75)
+                                        context.stroke(path, with: .color(.gray.opacity(0.7)), lineWidth: 0.3)
                                         y += spacing
                                     }
                                 }
                                 .clipShape(RoundedRectangle(cornerRadius: 16))
                             )
-                        // corner protectors — bottom two hug this card's bottom corners
-//                            .overlay(alignment: .bottomLeading) {
-//                                UnevenRoundedRectangle(topLeadingRadius: 3, bottomLeadingRadius: 18, bottomTrailingRadius: 3, topTrailingRadius: 3)
-//                                    .stroke(Color.black, lineWidth: 8)
-//                                    .fill(Color(red: 59/255, green: 59/255, blue: 59/255))
-//                                    .frame(width: 25, height: 25)
-//                                    .offset(x: -3, y: 3)
-//                            }
-//                            .overlay(alignment: .bottomTrailing) {
-//                                UnevenRoundedRectangle(topLeadingRadius: 3, bottomLeadingRadius: 3, bottomTrailingRadius: 18, topTrailingRadius: 3)
-//                                    .stroke(Color(.black), lineWidth: 8)
-//                                    .fill(Color(red: 59/255, green: 59/255, blue: 59/255))
-//                                    .frame(width: 25, height: 25)
-//                                    .offset(x: 3, y: 3)
-//                            }
                             .offset(y: -70)
                             .scaleEffect(1.05)
 
@@ -119,90 +85,136 @@ struct MiniRecorderView: View {
                             .scaleEffect(1.0)
                         ScrollView {
                             VStack(spacing: 2 * yScale) {
-                                ForEach(recordings, id: \.self) { url in
-                                    HStack {
-                                        Button {
-                                            if player.playingURL == url && player.isPlaying {
-                                                player.pause()
-                                            } else {
-                                                player.play(url)
+                                ForEach(recordings, id: \.fileName) { recording in
+                                    if let url = LayerPlayer.fileURL(filename: recording.fileName) {
+                                        HStack {
+                                            Button {
+                                                if let layers = recording.layers, !layers.isEmpty {
+                                                    layerPlayer.playStack(recording: recording)
+                                                } else {
+                                                    if player.playingURL == url && player.isPlaying {
+                                                        player.pause()
+                                                    } else {
+                                                        player.play(url)
+                                                    }
+                                                }
+                                            } label: {
+                                                Image(systemName: (player.playingURL == url && player.isPlaying) ? "pause.fill" : "play.fill")
+                                                    .foregroundStyle((player.playingURL == url && player.isPlaying) ? .red: .white)
+                                                    .font(.system(size: 25 * xScale))
+                                                
                                             }
-                                        } label: {
-                                            Image(systemName: (player.playingURL == url && player.isPlaying) ? "pause.fill" : "play.fill")
-                                                .foregroundStyle((player.playingURL == url && player.isPlaying) ? .red: .white)
-                                                .font(.system(size: 25 * xScale))
-
-                                        }
-                                        .buttonStyle(.plain)
-
-                                        Text(url.lastPathComponent)
-                                            .font(.system(size: 14 * xScale, weight: .bold, design: .rounded))
-                                            .foregroundStyle(Color(.white))
-                                            .lineLimit(1)
-                                            .truncationMode(.middle)
-                                        ProgressView(value: player.playingURL == url ? player.progress : 0)
-                                            .frame(width: 70 * xScale)
-
-                                        Spacer()
-
-                                        Button {
-                                            selectedURL = url
-                                            showAlert = true
-                                        } label: {
-                                            Image(systemName: "pencil")
+                                            .buttonStyle(.plain)
+                                            
+                                            Text(url.lastPathComponent)
+                                                .font(.system(size: 14 * xScale, weight: .bold, design: .rounded))
+                                                .foregroundStyle(Color(.white))
+                                                .lineLimit(1)
+                                                .truncationMode(.middle)
+                                            ProgressView(value: player.playingURL == url ? player.progress : 0)
+                                                .frame(width: 70 * xScale)
+                                            
+                                            Spacer()
+                                            
+                                            Button {
+                                                selectedRecording = recording
+                                                userInput = recording.displayName
+                                            } label: {
+                                                Image(systemName: "pencil")
                                                 .foregroundStyle(.white)
                                                 .font(.system(size: 25 * xScale))
+                                            }
+                                            .buttonStyle(.plain)
+                                            Button {
+                                                layerPlayer.stop()
+                                                layerTarget = recording
+                                                rec.start()
+                                            } label: {
+                                                Image(systemName: "plus.circle")
+                                                    .foregroundStyle(.white)
+                                                    .font(.system(size: 25 * xScale))
+                                            }
+
+                                            Button {
+                                                deleteTarget = recording
+                                            } label: {
+                                                Image(systemName: "trash.fill")
+                                                    .foregroundStyle(.red)
+                                                    .font(.system(size: 25 * xScale))
+                                            }
+                                            .buttonStyle(.plain)
                                         }
-                                        .alert("Rename file", isPresented: $showAlert){
-                                            TextField("New Filename", text: $userInput)
-                                            Button("OK") {
-                                                let trimmed = userInput.trimmingCharacters(in: .whitespacesAndNewlines)
-                                                if trimmed != ""{
-                                                    if player.playingURL == selectedURL {
-                                                        player.stop()
+                                        .padding(.horizontal, 10 * xScale)
+                                        .padding(.vertical, 13 * yScale)
+                                        .background(Color(red: 59/255, green: 59/255, blue: 59/255))
+                                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 12)
+                                                .stroke(Color(red: 59/255, green: 59/255, blue: 59/255), lineWidth: 4)
+                                        )
+                                        .scaleEffect(0.9)
+
+                                        if let layers = recording.layers {
+                                            ForEach(layers, id: \.fileName) { layer in
+                                                if let layerURL = LayerPlayer.fileURL(filename: layer.fileName) {
+                                                    HStack {
+                                                        Image(systemName: "arrow.turn.down.right")
+                                                            .foregroundStyle(.white.opacity(0.5))
+                                                            .font(.system(size: 12 * xScale))
+
+                                                        Button {
+                                                            if player.playingURL == layerURL && player.isPlaying {
+                                                                player.pause()
+                                                            } else {
+                                                                player.play(layerURL)
+                                                            }
+                                                        } label: {
+                                                            Image(systemName: (player.playingURL == layerURL && player.isPlaying) ? "pause.fill" : "play.fill")
+                                                                .foregroundStyle((player.playingURL == layerURL && player.isPlaying) ? .red : .white)
+                                                                .font(.system(size: 20 * xScale))
+                                                        }
+                                                        .buttonStyle(.plain)
+
+                                                        Text(layer.displayName)
+                                                            .font(.system(size: 13 * xScale, weight: .semibold, design: .rounded))
+                                                            .foregroundStyle(.white.opacity(0.85))
+                                                            .lineLimit(1)
+                                                            .truncationMode(.middle)
+
+                                                        ProgressView(value: player.playingURL == layerURL ? player.progress : 0)
+                                                            .frame(width: 50 * xScale)
+
+                                                        Spacer()
+
+                                                        Button {
+                                                            selectedRecording = layer
+                                                            userInput = layer.displayName
+                                                        } label: {
+                                                            Image(systemName: "pencil")
+                                                                .foregroundStyle(.white)
+                                                                .font(.system(size: 18 * xScale))
+                                                        }
+                                                        .buttonStyle(.plain)
+
+                                                        Button {
+                                                            deleteTarget = layer
+                                                        } label: {
+                                                            Image(systemName: "trash.fill")
+                                                                .foregroundStyle(.red)
+                                                                .font(.system(size: 18 * xScale))
+                                                        }
+                                                        .buttonStyle(.plain)
                                                     }
-                                                    if let selectedURL {
-                                                        rec.renameFile(selectedURL, to: trimmed)
-                                                    }
-                                                    recordings = recordingList()
-                                                    userInput = ""
+                                                    .padding(.leading, 28 * xScale)
+                                                    .padding(.horizontal, 10 * xScale)
+                                                    .padding(.vertical, 8 * yScale)
+                                                    .background(Color(red: 45/255, green: 45/255, blue: 45/255))
+                                                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                                                    .scaleEffect(0.9)
                                                 }
                                             }
                                         }
-                                        .buttonStyle(.plain)
-
-                                        Button {
-                                            showDeleteAlert = true
-                                        } label: {
-                                            Image(systemName: "trash.fill")
-                                                .foregroundStyle(.red)
-                                                .font(.system(size: 25 * xScale))
-                                        }
-                                        .alert("Delete File?", isPresented: $showDeleteAlert){
-                                            Button("Cancel"){
-                                                showDeleteAlert = false
-                                            }
-                                            Button("OK") {
-                                                try? FileManager.default.removeItem(at: url)
-                                                if player.playingURL == url {
-                                                    player.stop()
-                                                }
-                                                recordings = recordingList()
-                                            }
-
-                                        }
-
-                                        .buttonStyle(.plain)
                                     }
-                                    .padding(.horizontal, 10 * xScale)
-                                    .padding(.vertical, 13 * yScale)
-                                    .background(Color(red: 59/255, green: 59/255, blue: 59/255))
-                                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 12)
-                                            .stroke(Color(red: 59/255, green: 59/255, blue: 59/255), lineWidth: 4)
-                                    )
-                                    .scaleEffect(0.9)
                                 }
                             }
                             .padding(.horizontal, 4 * xScale)
@@ -213,29 +225,12 @@ struct MiniRecorderView: View {
                         // control panel
                         ZStack {
                             RoundedRectangle(cornerRadius: 14)
-                            //                                .fill(Color(red: 228/255, green: 205/255, blue: 158/255))
                                 .fill(Color(red: 255/255, green: 255/255, blue: 242/255))
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 14)
                                         .stroke(Color.black, lineWidth: 4)
                                 )
                                 .frame(width: 400, height: 100)
-                            // corner protectors — top two hug this control panel's top corners
-//                                .overlay(alignment: .topLeading) {
-//                                    UnevenRoundedRectangle(topLeadingRadius: 18, bottomLeadingRadius: 3, bottomTrailingRadius: 3, topTrailingRadius: 3)
-//                                        .stroke(Color.black, lineWidth: 8)
-//                                        .fill(Color(red: 59/255, green: 59/255, blue: 59/255))
-//                                        .frame(width: 25, height: 25)
-//                                        .offset(x: -3, y: -3)
-//                                }
-//                                .overlay(alignment: .topTrailing) {
-//                                    UnevenRoundedRectangle(topLeadingRadius: 3, bottomLeadingRadius: 3, bottomTrailingRadius: 3, topTrailingRadius: 18)
-//                                        .stroke(Color.black, lineWidth: 8)
-//                                        .fill(Color(red: 59/255, green: 59/255, blue: 59/255))
-//                                        .frame(width: 25, height: 25)
-//                                        .offset(x: 3, y: -3)
-//                                }
-//                                .scaleEffect(1.05)
 
                             HStack(alignment: .bottom, spacing: 18) {
                                 VStack(spacing: 6) {
@@ -243,6 +238,7 @@ struct MiniRecorderView: View {
                                         if rec.isRecording {
                                             rec.stop()
                                         } else {
+                                            layerPlayer.stop()
                                             player.stop()
                                             rec.start()
                                         }
@@ -351,14 +347,58 @@ struct MiniRecorderView: View {
                     .offset(y: 90)
                 }
                 .padding()
-                .task {
-                    recordings = recordingList()
+                .alert("Rename file", isPresented: Binding(
+                    get: { selectedRecording != nil },
+                    set: { if !$0 { selectedRecording = nil } }
+                )) {
+                    TextField("New Filename", text: $userInput)
+                    Button("Cancel", role: .cancel) { selectedRecording = nil }
+                    Button("OK") {
+                        let trimmed = userInput.trimmingCharacters(in: .whitespacesAndNewlines)
+                        if trimmed != "" {
+                            selectedRecording?.displayName = trimmed
+                        }
+                        userInput = ""
+                        selectedRecording = nil
+                    }
+                }
+                .alert("Delete File?", isPresented: Binding(
+                    get: { deleteTarget != nil },
+                    set: { if !$0 { deleteTarget = nil } }
+                )) {
+                    Button("Cancel", role: .cancel) { deleteTarget = nil }
+                    Button("OK", role: .destructive) {
+                        guard let target = deleteTarget else { return }
+                        if let layers = target.layers {
+                            for layer in layers {
+                                if let layerURL = LayerPlayer.fileURL(filename: layer.fileName) {
+                                    try? FileManager.default.removeItem(at: layerURL)
+                                    if player.playingURL == layerURL { player.stop() }
+                                }
+                            }
+                        }
+                        if let targetURL = LayerPlayer.fileURL(filename: target.fileName) {
+                            try? FileManager.default.removeItem(at: targetURL)
+                            if player.playingURL == targetURL { player.stop() }
+                        }
+                        modelContext.delete(target)
+                        deleteTarget = nil
+                    }
                 }
                 .onChange(of: rec.isRecording) { isRecording in
                     if isRecording {
                         player.stop()
                     } else {
-                        recordings = recordingList()
+                        guard let url = rec.fileURL else { return }
+                        let newRecording = RecorderModel(
+                            fileName: url.lastPathComponent,
+                            displayName: url.deletingPathExtension().lastPathComponent,
+                            createdDate: .now,
+                            parent: layerTarget,
+                            layers: []
+                        )
+                        modelContext.insert(newRecording)
+                        layerTarget = nil
                     }
                 }
             }

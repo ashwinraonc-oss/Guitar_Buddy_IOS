@@ -26,19 +26,19 @@ struct ProgressionView: View {
     var body: some View {
         VStack(spacing: 55) {
             VStack {
-                Text("Create")
-                    .font(.system(size: 30, weight: .bold))
-                    .foregroundStyle(.black)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
-                    .background(Color(red: 179/255, green: 235/255, blue: 242/255).opacity(1))
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.black, lineWidth: 3)
-                    )
-                    .padding(.bottom, 5)
-                    .padding(.top, 10)
+//                Text("Create")
+//                    .font(.system(size: 30, weight: .bold))
+//                    .foregroundStyle(.black)
+//                    .padding(.horizontal, 12)
+//                    .padding(.vertical, 8)
+//                    .background(Color(red: 179/255, green: 235/255, blue: 242/255).opacity(1))
+//                    .clipShape(RoundedRectangle(cornerRadius: 12))
+//                    .overlay(
+//                        RoundedRectangle(cornerRadius: 12)
+//                            .stroke(Color.black, lineWidth: 3)
+//                    )
+//                    .padding(.bottom, 5)
+//                    .padding(.top, 10)
                 HStack {
                     Picker("Root", selection: $selectedRoot) {
                         ForEach(rootOptions, id: \.self) { root in
@@ -123,6 +123,8 @@ struct ProgressionView: View {
                         let fretSpacing = 30 * scale
                         let labelFontSize = 30 * scale
                         let buttonIconSize = 30 * scale
+                        
+                        var pianoSet = false
 
                         LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: itemsPerRow), spacing: 4) {
                             ForEach(Array(progression.progression.enumerated()), id: \.offset) { _, chord in
@@ -133,16 +135,19 @@ struct ProgressionView: View {
                                             .foregroundStyle(Color.black)
                                             .bold()
                                             .font(Font.system(size: labelFontSize))
-                                        FretBoardDiagramView(fretArray: first, stringSpacing: stringSpacing, fretSpacing: fretSpacing, dotColor: .red)
-                                            .fixedSize()
-                                            .padding(-4)
-                                            .background(Color(red: 255/255, green: 191/255, blue: 0/255))
-//                                            .background(Color(red: 255/255, green: 199/255, blue: 55/255))
-                                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                                            .overlay(
-                                                RoundedRectangle(cornerRadius: 12)
-                                                    .stroke(Color.black, lineWidth: 3)
-                                            )
+                                        if pianoSet == false{
+                                            FretBoardDiagramView(fretArray: first, stringSpacing: stringSpacing, fretSpacing: fretSpacing, dotColor: .red)
+                                                .fixedSize()
+                                                .padding(-4)
+                                                .background(Color(red: 255/255, green: 191/255, blue: 0/255))
+    //                                            .background(Color(red: 255/255, green: 199/255, blue: 55/255))
+                                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                                .overlay(
+                                                    RoundedRectangle(cornerRadius: 12)
+                                                        .stroke(Color.black, lineWidth: 3)
+                                                )
+                                        } else {
+                                        }
 
                                         Button {                                          // ← add from here
                                             chordPlayer.playChord(fretArray: first)
