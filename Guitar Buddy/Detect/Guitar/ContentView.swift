@@ -203,24 +203,6 @@ struct ContentView: View {
                                     .offset(x: 0, y: min(595 * yScale, h - 195)) // capped so the readout stays above the tab bar on short screens
                                     .modifier(ShimmerModifier())
                                 }
-//                                if recorder.detectedChord == nil && recorder.isDetecting == false && recorder.failedConnection == false{
-//                                    HStack{
-//                                        Text("Detect")
-//                                            .font(.system(size: 30, weight: .bold))
-//                                            .padding(.top, 10)
-//                                            .padding(.bottom, 10)
-//                                            .foregroundStyle(Color(red: 9/255, green: 21/255, blue: 64/255))
-//                                            .padding(.horizontal, 20)
-//                                            .padding(.vertical, 0)
-//                                            .background(Color(red: 88/255, green: 217/255, blue: 99/255))
-//                                            .clipShape(RoundedRectangle(cornerRadius: 12))
-//                                            .overlay(
-//                                                RoundedRectangle(cornerRadius: 12)
-//                                                    .stroke(Color.black, lineWidth: 3)
-//                                            )
-//                                            .offset(x: 0, y: 600 * yScale)
-//                                    }
-//                                }
                                 
                                 if recorder.failedConnection == true {
                                     
