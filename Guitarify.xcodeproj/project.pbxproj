@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		8549119B3054447E00EEFAAA /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = 8549119A3054447E00EEFAAA /* Lottie */; };
+		856C3A273083C6E400ED5216 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 856C3A263083C6E400ED5216 /* PrivacyInfo.xcprivacy */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -31,6 +32,7 @@
 		850151273045CCAA00979D0C /* Guitar Buddy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Guitar Buddy.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		850151343045CCAC00979D0C /* Guitar BuddyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Guitar BuddyTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8501513E3045CCAC00979D0C /* Guitar BuddyUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Guitar BuddyUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		856C3A263083C6E400ED5216 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -80,6 +82,7 @@
 		8501511E3045CCAA00979D0C = {
 			isa = PBXGroup;
 			children = (
+				856C3A263083C6E400ED5216 /* PrivacyInfo.xcprivacy */,
 				850151293045CCAA00979D0C /* Guitar Buddy */,
 				850151373045CCAC00979D0C /* Guitar BuddyTests */,
 				850151413045CCAC00979D0C /* Guitar BuddyUITests */,
@@ -192,7 +195,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 850151223045CCAA00979D0C /* Build configuration list for PBXProject "Guitar Buddy" */;
+			buildConfigurationList = 850151223045CCAA00979D0C /* Build configuration list for PBXProject "Guitarify" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -221,6 +224,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				856C3A273083C6E400ED5216 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -408,9 +412,10 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Guitar-Buddy-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = Guitarify;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
-				INFOPLIST_KEY_LSApplicationCategoryType = "";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Need microphone to detect musical notes played by user";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.music";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Guitarify records a short clip of you playing so it can identify the chord. The audio is sent to our server for analysis and is not kept.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -443,9 +448,10 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Guitar-Buddy-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = Guitarify;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
-				INFOPLIST_KEY_LSApplicationCategoryType = "";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Need microphone to detect musical notes played by user";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.music";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Guitarify records a short clip of you playing so it can identify the chord. The audio is sent to our server for analysis and is not kept.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -550,7 +556,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		850151223045CCAA00979D0C /* Build configuration list for PBXProject "Guitar Buddy" */ = {
+		850151223045CCAA00979D0C /* Build configuration list for PBXProject "Guitarify" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				850151463045CCAC00979D0C /* Debug */,

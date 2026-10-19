@@ -18,7 +18,7 @@
                BlueprintIdentifier = "850151263045CCAA00979D0C"
                BuildableName = "Guitar Buddy.app"
                BlueprintName = "Guitar Buddy"
-               ReferencedContainer = "container:Guitar Buddy.xcodeproj">
+               ReferencedContainer = "container:Guitarify.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -38,7 +38,7 @@
                BlueprintIdentifier = "850151333045CCAC00979D0C"
                BuildableName = "Guitar BuddyTests.xctest"
                BlueprintName = "Guitar BuddyTests"
-               ReferencedContainer = "container:Guitar Buddy.xcodeproj">
+               ReferencedContainer = "container:Guitarify.xcodeproj">
             </BuildableReference>
          </TestableReference>
          <TestableReference
@@ -49,7 +49,7 @@
                BlueprintIdentifier = "8501513D3045CCAC00979D0C"
                BuildableName = "Guitar BuddyUITests.xctest"
                BlueprintName = "Guitar BuddyUITests"
-               ReferencedContainer = "container:Guitar Buddy.xcodeproj">
+               ReferencedContainer = "container:Guitarify.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -72,7 +72,7 @@
             BlueprintIdentifier = "850151263045CCAA00979D0C"
             BuildableName = "Guitar Buddy.app"
             BlueprintName = "Guitar Buddy"
-            ReferencedContainer = "container:Guitar Buddy.xcodeproj">
+            ReferencedContainer = "container:Guitarify.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -89,7 +89,7 @@
             BlueprintIdentifier = "850151263045CCAA00979D0C"
             BuildableName = "Guitar Buddy.app"
             BlueprintName = "Guitar Buddy"
-            ReferencedContainer = "container:Guitar Buddy.xcodeproj">
+            ReferencedContainer = "container:Guitarify.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
