@@ -23,8 +23,8 @@ struct ElectricTunerView: View {
         let centerOffset = 75.0 * scale
         var needleAngle: Double {
             let base = Double(0.0)
-            let clampedCents = max(min(Double(tuner.chromaticCentsOff), 150), -150)   // clamp to ±1.5 semitones
-            let offset = clampedCents * (15.0 / 150.0)                        // map ±150 cents → ±15°
+            let clampedCents = max(min(Double(tuner.chromaticCentsOff), 50), -50)   // chromatic offset is at most ±50 cents (half a semitone)
+            let offset = clampedCents * (45.0 / 50.0)                         // map ±50 cents → ±45°, the full width of the tick marks
             return base + offset
         }
         VStack{

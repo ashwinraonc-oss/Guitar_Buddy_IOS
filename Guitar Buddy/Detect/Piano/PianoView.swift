@@ -155,6 +155,33 @@ struct PianoView: View {
                                         .foregroundStyle(.black)
                                 }
                             }
+                            .overlay(alignment: .bottom) {
+                                // step back/forward through recent detections; an overlay so it takes no layout space
+                                HStack(spacing: 60 * uiScale) {
+                                    Button {
+                                        recorder.goBack()
+                                    } label: {
+                                        Image(systemName: "chevron.left")
+                                            .font(.system(size: 28 * uiScale, weight: .semibold))
+                                            .foregroundStyle(.black.opacity(recorder.canGoBack ? 0.6 : 0.2))
+                                            .frame(width: 44, height: 44)
+                                            .contentShape(Rectangle())
+                                    }
+                                    .disabled(!recorder.canGoBack)
+
+                                    Button {
+                                        recorder.goForward()
+                                    } label: {
+                                        Image(systemName: "chevron.right")
+                                            .font(.system(size: 28 * uiScale, weight: .semibold))
+                                            .foregroundStyle(.black.opacity(recorder.canGoForward ? 0.6 : 0.2))
+                                            .frame(width: 44, height: 44)
+                                            .contentShape(Rectangle())
+                                    }
+                                    .disabled(!recorder.canGoForward)
+                                }
+                                .offset(y: 55 * uiScale)
+                            }
                         }
                         if recorder.detectedChord == nil && recorder.isDetecting == false && recorder.failedConnection == false {
                             Text("Detect")

@@ -21,9 +21,17 @@ struct DetectionResult: Codable {
     let midi_notes: [Int]
 }
 
+struct DetectionPrev: Identifiable, Codable {
+    var id: UUID
+    let date: Date
+    let detection: DetectionResult
+}
+
 class AudioController: NSObject, ObservableObject, AVAudioRecorderDelegate {
     var recordingSession: AVAudioSession!
     var audioRecorder: AVAudioRecorder?
+    @Published var chordHistory: [DetectionPrev] = []
+    @Published var historyIndex: Int? // which chordHistory entry is currently on screen
     @Published var detectedChord: String?
     @Published var voicings: [[Int]]?
     @Published var detectedNotes: [String]?
@@ -130,20 +138,24 @@ class AudioController: NSObject, ObservableObject, AVAudioRecorderDelegate {
                     print(result.chord)
                     DispatchQueue.main.async {
                         print(result.chord)
-                        self.detectedChord = result.chord
-                        self.voicings = result.voicing
-                        self.detectedNotes = result.note_names
                         self.isDetecting = false
-                        self.midiNotes = result.midi_notes
-                        self.chord_notes = result.chord_notes
-                        self.chord_notes_names = result.chord_notes_names
-                        self.chord_notes_names_midi = result.chord_notes_names_midi
-                        self.root = result.root
+                        self.apply(result)
+                        let chordDate = Date()
+                        let id = UUID()
+                        let curr_chord = DetectionPrev(id: id, date: chordDate, detection: result)
+                        self.chordHistory.append(curr_chord)
+                        if self.chordHistory.count > 8{
+                            self.chordHistory.removeFirst()
+                        }
+                        self.historyIndex = self.chordHistory.count - 1
+
                     }
                 } else {
                     print("result from backend did not return properly")
-                    self.isDetecting = false
-                    self.failedConnection = true
+                    DispatchQueue.main.async{
+                        self.isDetecting = false
+                        self.failedConnection = true
+                    }
                 }
             }.resume()
 
@@ -152,6 +164,43 @@ class AudioController: NSObject, ObservableObject, AVAudioRecorderDelegate {
             self.isDetecting = false
         }
     }
+    // puts a detection result on screen. chord_notes_names must be set before chord_notes_names_midi,
+    // because PianoController reads chord_notes_names when chord_notes_names_midi publishes
+    func apply(_ result: DetectionResult) {
+        detectedChord = result.chord
+        voicings = result.voicing
+        detectedNotes = result.note_names
+        midiNotes = result.midi_notes
+        chord_notes = result.chord_notes
+        chord_notes_names = result.chord_notes_names
+        chord_notes_names_midi = result.chord_notes_names_midi
+        root = result.root
+    }
+
+    var canGoBack: Bool {
+        (historyIndex ?? 0) > 0
+    }
+
+    var canGoForward: Bool {
+        guard let index = historyIndex else { return false }
+        return index < chordHistory.count - 1
+    }
+
+    func goBack() {
+        guard let index = historyIndex, index > 0 else { return }
+        show(index - 1)
+    }
+
+    func goForward() {
+        guard let index = historyIndex, index < chordHistory.count - 1 else { return }
+        show(index + 1)
+    }
+
+    private func show(_ index: Int) {
+        historyIndex = index
+        apply(chordHistory[index].detection)
+    }
+
     func reset() {
         detectedChord = nil
         voicings = []

@@ -154,7 +154,7 @@ struct ContentView: View {
                                                 }
                                                 chordPlayer.playChord(fretArray: firstVoicing)
                                                 stringVibration = 8
-                                                withAnimation(.spring(response: 0.15, dampingFraction: 0.15)) {
+                                                withAnimation(.spring(response: 0.3, dampingFraction: 0.15)) {
                                                     stringVibration = 0
                                                 }
                                             } label: {
@@ -186,7 +186,7 @@ struct ContentView: View {
                                                     print(recorder.midiNotes.count)
                                                     chordPlayer.playMIDI(midiArray: recorder.midiNotes)
                                                     stringVibration = 8
-                                                    withAnimation(.spring(response: 0.15, dampingFraction: 0.15)) {
+                                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.15)) {
                                                         stringVibration = 0
                                                     }
                                                 } label: {
@@ -271,6 +271,34 @@ struct ContentView: View {
                                     }
                                 }
                                 .scaleEffect(3.0)
+                                .overlay {
+                                    // step back/forward through recent detections, either side of the record button
+                                    ZStack {
+                                        Button {
+                                            recorder.goBack()
+                                        } label: {
+                                            Image(systemName: "chevron.left")
+                                                .font(.system(size: 28 * uiScale, weight: .semibold))
+                                                .foregroundStyle(.black.opacity(recorder.canGoBack ? 0.6 : 0.2))
+                                                .frame(width: 44, height: 44)
+                                                .contentShape(Rectangle())
+                                        }
+                                        .disabled(!recorder.canGoBack)
+                                        .offset(x: -150 * xScale)
+
+                                        Button {
+                                            recorder.goForward()
+                                        } label: {
+                                            Image(systemName: "chevron.right")
+                                                .font(.system(size: 28 * uiScale, weight: .semibold))
+                                                .foregroundStyle(.black.opacity(recorder.canGoForward ? 0.6 : 0.2))
+                                                .frame(width: 44, height: 44)
+                                                .contentShape(Rectangle())
+                                        }
+                                        .disabled(!recorder.canGoForward)
+                                        .offset(x: 150 * xScale)
+                                    }
+                                }
                                 .offset(x: 0, y: -380 * yScale)
                             }
                             .frame(maxWidth: .infinity)
